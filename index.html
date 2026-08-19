@@ -141,38 +141,6 @@
   @media (max-width:640px){.hero-trust-line{gap:7px 9px;font-size:.7rem}.hero h1{max-width:14ch}.hero p.sub{font-size:1rem}}
 
 
-
-
-  /* Quantix X product preview */
-  .qx-product-panel{
-    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:min(680px,78vw); padding:0; border:1px solid rgba(255,255,255,.13);
-    border-radius:20px; overflow:hidden; text-align:left; z-index:5;
-    background:linear-gradient(145deg,rgba(15,20,32,.92),rgba(6,10,18,.84));
-    box-shadow:0 28px 90px rgba(0,0,0,.5),0 0 70px rgba(56,189,248,.12);
-    backdrop-filter:blur(22px);
-    animation:panelFloat 7s ease-in-out infinite;
-  }
-  @keyframes panelFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-8px)}}
-  .qx-panel-top{height:42px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
-  .qx-window-dots{display:flex;gap:5px}.qx-window-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}
-  .qx-live{font:600 .62rem 'JetBrains Mono';letter-spacing:.06em;color:#8be8d0}.qx-live b{display:inline-block;width:5px;height:5px;border-radius:50%;background:#5eead4;box-shadow:0 0 8px #5eead4;margin-right:6px}
-  .qx-time{margin-left:auto;color:var(--muted);font:500 .6rem 'JetBrains Mono'}
-  .qx-panel-body{padding:18px 20px 14px}
-  .qx-panel-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.qx-panel-heading small{display:block;color:var(--muted);font:500 .58rem 'JetBrains Mono';letter-spacing:.08em}.qx-panel-heading strong{display:block;margin-top:3px;font:600 1rem 'Space Grotesk'}
-  .qx-ai-chip{font:600 .57rem 'JetBrains Mono';padding:6px 9px;border:1px solid rgba(56,189,248,.2);background:rgba(56,189,248,.07);border-radius:8px;color:var(--blue)}
-  .qx-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.qx-metrics>div{padding:11px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.025)}
-  .qx-metrics span,.qx-chart-head{font:500 .55rem 'JetBrains Mono';color:var(--muted);letter-spacing:.05em}.qx-metrics strong{display:block;font:600 1.08rem 'Space Grotesk';margin:4px 0}.qx-metrics em{font:500 .56rem 'JetBrains Mono';font-style:normal;color:#5eead4}
-  .qx-chart{margin-top:10px;padding:11px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.018)}.qx-chart-head{display:flex;justify-content:space-between}
-  .qx-bars{height:74px;display:flex;align-items:end;gap:7px;padding:9px 8px 1px}.qx-bars i{display:block;flex:1;border-radius:4px 4px 1px 1px;background:linear-gradient(to top,rgba(56,189,248,.25),rgba(34,211,238,.9));box-shadow:0 0 14px rgba(34,211,238,.08);animation:barPulse 4s ease-in-out infinite}.qx-bars i:nth-child(2){animation-delay:.2s}.qx-bars i:nth-child(3){animation-delay:.4s}.qx-bars i:nth-child(4){animation-delay:.6s}.qx-bars i:nth-child(5){animation-delay:.8s}.qx-bars i:nth-child(6){animation-delay:1s}.qx-bars i:nth-child(7){animation-delay:1.2s}
-  @keyframes barPulse{50%{opacity:.65;transform:scaleY(.94)}}
-  .qx-insight{display:flex;gap:9px;margin-top:10px;padding:9px 11px;border-radius:9px;background:rgba(56,189,248,.055);border:1px solid rgba(56,189,248,.12)}.qx-insight>span{color:var(--blue)}.qx-insight b{font:600 .63rem 'JetBrains Mono';color:var(--blue)}.qx-insight p{margin-top:2px;color:#9ba8bd;font-size:.64rem;line-height:1.45}
-  .qx-ask{display:flex;justify-content:space-between;align-items:center;margin:0 16px 15px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.2);color:#64728a;font:500 .61rem 'JetBrains Mono'}.qx-ask b{color:var(--blue);font-size:.9rem}
-  .qx-product-panel + *{z-index:1}
-  @media (max-width:820px){.qx-product-panel{width:min(640px,88vw)}.qx-metrics{grid-template-columns:1fr}.qx-metrics>div:nth-child(2),.qx-metrics>div:nth-child(3){display:none}.qx-chart{display:none}.qx-insight{margin-top:10px}.qx-product-panel{top:50%}}
-  @media (max-width:640px){.qx-product-panel{width:92vw}.qx-panel-body{padding:14px}.qx-ask{margin:0 12px 12px}.qx-panel-top{padding:0 12px}.qx-time{display:none}.orb-wrap{margin-top:52px;height:280px}.orb-core{width:190px;height:190px}.ring.r1{width:250px;height:250px}.ring.r2{width:320px;height:320px}.ring.r3{width:400px;height:400px}.qx-product-panel{transform:translate(-50%,-50%) scale(.82);transform-origin:center}.qx-product-panel{animation:panelFloatMobile 7s ease-in-out infinite}}
-  @keyframes panelFloatMobile{0%,100%{transform:translate(-50%,-50%) scale(.82) translateY(0)}50%{transform:translate(-50%,-50%) scale(.82) translateY(-7px)}}
-
   /* Orb */
   .orb-wrap{
     position:relative; width:100%; max-width:820px; height:420px; margin-top:70px;
@@ -337,6 +305,41 @@
   @media (max-width:820px){
     .nav-links{ display:none; }
   }
+
+  /* DATA INTAKE */
+  .intake-shell{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:stretch}
+  .intake-card,.intake-result{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:18px;padding:26px}
+  .intake-card h3,.intake-result h3{font-family:'Space Grotesk';font-size:1.25rem;margin-bottom:8px}
+  .intake-card>p,.intake-result>p{color:var(--muted);font-size:.88rem;line-height:1.55}
+  .dropzone{margin-top:20px;border:1px dashed rgba(56,189,248,.35);border-radius:15px;padding:30px 20px;text-align:center;background:rgba(56,189,248,.035);transition:.25s}
+  .dropzone.drag{border-color:var(--cyan);background:rgba(56,189,248,.08);transform:translateY(-2px)}
+  .drop-icon{width:48px;height:48px;margin:0 auto 13px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:var(--blue);font-size:1.25rem}
+  .dropzone strong{display:block;font-family:'Space Grotesk';font-size:1rem}
+  .dropzone span{display:block;margin-top:7px;color:var(--muted);font-size:.78rem}
+  .file-input{display:none}
+  .intake-file{display:none;margin-top:14px;padding:11px 13px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.025);font-family:'JetBrains Mono';font-size:.7rem;color:#b9c7da;text-align:left}
+  .intake-file.show{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .intake-file b{color:var(--blue);font-weight:600}
+  .analyze-btn{width:100%;margin-top:14px}
+  .scan{margin-top:18px;display:none}
+  .scan.show{display:block}
+  .scan-head{display:flex;justify-content:space-between;color:var(--muted);font:500 .68rem 'JetBrains Mono';margin-bottom:8px}
+  .scan-track{height:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+  .scan-bar{width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .25s ease}
+  .result-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .result-badge{padding:6px 9px;border-radius:8px;border:1px solid rgba(94,234,212,.18);background:rgba(94,234,212,.06);color:#5eead4;font:600 .62rem 'JetBrains Mono'}
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+  .result-kpi{padding:14px;border:1px solid rgba(255,255,255,.06);border-radius:11px;background:rgba(255,255,255,.025)}
+  .result-kpi span{display:block;color:var(--muted);font:500 .6rem 'JetBrains Mono';letter-spacing:.04em}
+  .result-kpi strong{display:block;font:600 1.25rem 'Space Grotesk';margin-top:5px}
+  .result-kpi em{display:block;color:#5eead4;font:500 .6rem 'JetBrains Mono';font-style:normal;margin-top:3px}
+  .result-list{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .result-item{display:flex;gap:10px;padding:11px 12px;border-radius:10px;background:rgba(56,189,248,.045);border:1px solid rgba(56,189,248,.1);font-size:.76rem;line-height:1.45;color:#b7c4d8}
+  .result-item b{color:var(--blue);font-family:'JetBrains Mono';font-size:.65rem;white-space:nowrap}
+  .intake-note{margin-top:14px;color:var(--muted-2);font:500 .62rem 'JetBrains Mono';line-height:1.5}
+  @media(max-width:850px){.intake-shell{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.intake-card,.intake-result{padding:20px}.result-grid{grid-template-columns:1fr}.result-kpi:nth-child(n+2){display:none}}
+
 </style>
 </head>
 <body>
@@ -352,7 +355,7 @@
   </div>
   <div class="nav-links">
     <a href="#features">Features</a>
-    <a href="#gallery">Dashboards</a>
+    <a href="#gallery">Dashboards</a><a href="#intake">Data Intake</a>
     <a href="#chat">AI Demo</a>
     <a href="#solutions">Solutions</a>
     <a href="#pricing">Pricing</a>
@@ -385,36 +388,6 @@
     <div class="kpi-float kpi2"><div class="lbl">Forecast Accuracy</div><div class="val">96.4%</div></div>
     <div class="kpi-float kpi3"><div class="lbl">Reports Generated</div><div class="val up">1,204 ↑</div></div>
     <div class="kpi-float kpi4"><div class="lbl">Avg. Time Saved</div><div class="val">18 hrs/wk</div></div>
-
-    <div class="qx-product-panel" aria-label="Quantix X Intelligence Workspace preview">
-      <div class="qx-panel-top">
-        <div class="qx-window-dots"><i></i><i></i><i></i></div>
-        <span class="qx-live"><b></b> LIVE INTELLIGENCE</span>
-        <span class="qx-time">Today · 9:30 PM</span>
-      </div>
-      <div class="qx-panel-body">
-        <div class="qx-panel-heading">
-          <div>
-            <small>EXECUTIVE OVERVIEW</small>
-            <strong>Business Performance</strong>
-          </div>
-          <span class="qx-ai-chip">✦ AI ANALYZED</span>
-        </div>
-        <div class="qx-metrics">
-          <div><span>MTD BUSINESS</span><strong>₹2.84 Cr</strong><em>↑ 18.6%</em></div>
-          <div><span>ACTIVE UNITS</span><strong>27</strong><em>↑ 12.0%</em></div>
-          <div><span>FORECAST</span><strong>96.4%</strong><em>ACCURACY</em></div>
-        </div>
-        <div class="qx-chart">
-          <div class="qx-chart-head"><span>Performance trend</span><span>MTD</span></div>
-          <div class="qx-bars"><i style="height:34%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:63%"></i><i style="height:58%"></i><i style="height:76%"></i><i style="height:91%"></i></div>
-        </div>
-        <div class="qx-insight">
-          <span>✦</span><div><b>Quantix Insight</b><p>Performance is ahead of target. West region is the strongest growth driver.</p></div>
-        </div>
-      </div>
-      <div class="qx-ask"><span>Ask Quantix X anything about your data...</span><b>↗</b></div>
-    </div>
   </div>
 </section>
 
@@ -443,6 +416,54 @@
       <div class="card reveal"><div class="icon">▲</div><h3>Forecasting</h3><p>Project next quarter's numbers using your own historical trends, refreshed as new data lands.</p></div>
       <div class="card reveal"><div class="icon">✉</div><h3>Email Automation</h3><p>Turn weekly performance data into ready-to-send narrative updates for leadership, on schedule.</p></div>
       <div class="card reveal"><div class="icon">▦</div><h3>Executive Reports</h3><p>One click compiles dashboards, commentary, and appendix data into a board-ready document.</p></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DATA INTAKE -->
+<section id="intake">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="section-tag">Data → Intelligence</div>
+      <h2 class="display">Start with the data you already have</h2>
+      <p>Upload a workbook and see how Quantix X turns raw business data into an executive-ready intelligence layer.</p>
+    </div>
+    <div class="intake-shell">
+      <div class="intake-card reveal">
+        <h3>Bring your business data</h3>
+        <p>Try the interactive product preview. Select an Excel, CSV, or PDF file to simulate the Quantix X analysis workflow.</p>
+        <label class="dropzone" id="dropzone" for="dataFile">
+          <div class="drop-icon">↥</div>
+          <strong>Drop your file here</strong>
+          <span>or tap to browse · XLSX, CSV, PDF · up to 25 MB</span>
+        </label>
+        <input class="file-input" id="dataFile" type="file" accept=".xlsx,.xls,.csv,.pdf">
+        <div class="intake-file" id="intakeFile"><span id="fileName">No file selected</span><b id="fileType">READY</b></div>
+        <button class="btn btn-primary analyze-btn" id="analyzeBtn" type="button">✦ Analyze with Quantix X</button>
+        <div class="scan" id="scan">
+          <div class="scan-head"><span id="scanLabel">Preparing analysis...</span><span id="scanPct">0%</span></div>
+          <div class="scan-track"><div class="scan-bar" id="scanBar"></div></div>
+        </div>
+        <div class="intake-note">Demo mode: this preview does not upload or store your file.</div>
+      </div>
+
+      <div class="intake-result reveal">
+        <div class="result-top">
+          <div><h3>AI intelligence layer</h3><p id="resultCopy">Select a file to activate the analysis preview.</p></div>
+          <span class="result-badge" id="resultBadge">STANDBY</span>
+        </div>
+        <div class="result-grid">
+          <div class="result-kpi"><span>ROWS ANALYZED</span><strong id="rowsKpi">—</strong><em>data points</em></div>
+          <div class="result-kpi"><span>KPIs FOUND</span><strong id="kpiKpi">—</strong><em>business signals</em></div>
+          <div class="result-kpi"><span>CONFIDENCE</span><strong id="confidenceKpi">—</strong><em>AI assessment</em></div>
+        </div>
+        <div class="result-list">
+          <div class="result-item"><b>01 · SIGNAL</b><span id="signal1">Quantix X will surface the strongest growth driver and the largest performance gap.</span></div>
+          <div class="result-item"><b>02 · ACTION</b><span id="signal2">Recommendations will be prioritized by business impact and urgency.</span></div>
+          <div class="result-item"><b>03 · OUTPUT</b><span id="signal3">Executive summary, KPI dashboard, and report-ready insights.</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -668,6 +689,74 @@
   chatInput.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter') runDemo('custom');
   });
+
+  // Data intake demo
+  const dataFile = document.getElementById('dataFile');
+  const dropzone = document.getElementById('dropzone');
+  const intakeFile = document.getElementById('intakeFile');
+  const fileName = document.getElementById('fileName');
+  const fileType = document.getElementById('fileType');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const scan = document.getElementById('scan');
+  const scanBar = document.getElementById('scanBar');
+  const scanPct = document.getElementById('scanPct');
+  const scanLabel = document.getElementById('scanLabel');
+  const resultBadge = document.getElementById('resultBadge');
+  const resultCopy = document.getElementById('resultCopy');
+  const rowsKpi = document.getElementById('rowsKpi');
+  const kpiKpi = document.getElementById('kpiKpi');
+  const confidenceKpi = document.getElementById('confidenceKpi');
+  const signal1 = document.getElementById('signal1');
+  const signal2 = document.getElementById('signal2');
+  const signal3 = document.getElementById('signal3');
+
+  function showSelectedFile(file){
+    if(!file) return;
+    fileName.textContent = file.name;
+    fileType.textContent = (file.name.split('.').pop() || 'FILE').toUpperCase();
+    intakeFile.classList.add('show');
+    resultBadge.textContent = 'FILE READY';
+    resultCopy.textContent = 'Ready to map the file into Quantix X intelligence.';
+  }
+  dataFile.addEventListener('change', e => showSelectedFile(e.target.files[0]));
+  ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+  dropzone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if(file) showSelectedFile(file);
+  });
+
+  analyzeBtn.addEventListener('click', () => {
+    if(!dataFile.files[0]){
+      dataFile.click();
+      return;
+    }
+    scan.classList.add('show');
+    analyzeBtn.disabled = true;
+    analyzeBtn.style.opacity = '.65';
+    let pct = 0;
+    const labels = ['Reading structure...','Mapping KPIs...','Detecting trends...','Generating recommendations...','Intelligence ready'];
+    const timer = setInterval(() => {
+      pct += 20;
+      scanBar.style.width = pct + '%';
+      scanPct.textContent = pct + '%';
+      scanLabel.textContent = labels[Math.min(pct/20 - 1, labels.length - 1)];
+      if(pct >= 100){
+        clearInterval(timer);
+        resultBadge.textContent = 'ANALYSIS READY';
+        resultCopy.textContent = 'Quantix X mapped the file and generated an executive intelligence layer.';
+        rowsKpi.textContent = '12,480';
+        kpiKpi.textContent = '18';
+        confidenceKpi.textContent = '96.4%';
+        signal1.textContent = 'Revenue is trending above target, with the West region emerging as the strongest growth driver.';
+        signal2.textContent = 'Two performance pockets are below target; Quantix X recommends focused action before month-end.';
+        signal3.textContent = 'Executive dashboard + narrative summary + forecast are ready for review.';
+        analyzeBtn.textContent = '✓ Analysis Complete';
+        analyzeBtn.style.opacity = '1';
+      }
+    }, 420);
+  });
+
 </script>
 
 </body>
