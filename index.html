@@ -409,6 +409,12 @@
   .analysis-error{display:none;margin-top:12px;padding:10px;border-radius:9px;border:1px solid rgba(248,113,113,.18);background:rgba(248,113,113,.05);color:#fca5a5;font-size:.68rem;line-height:1.45}
   .analysis-error.show{display:block}
 
+
+  /* SMART EXCEL STRUCTURE */
+  .structure-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 8px;border-radius:7px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.12);color:#7dd3fc;font:500 .56rem 'JetBrains Mono'}
+  .structure-badge i{width:6px;height:6px;border-radius:50%;background:#5eead4}
+  .profile-note strong{color:#aebbd0}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -506,7 +512,7 @@
         <label class="dropzone" id="dropzone" for="dataFile">
           <div class="drop-icon">↥</div>
           <strong>Drop your file here</strong>
-          <span>or tap to browse · XLSX, CSV, PDF · up to 25 MB</span>
+          <span>or tap to browse · XLSX, CSV · up to 25 MB</span>
         </label>
         <input class="file-input" id="dataFile" type="file" accept=".xlsx,.xls,.csv,.pdf">
         <div class="intake-file" id="intakeFile"><span id="fileName">No file selected</span><b id="fileType">READY</b></div>
@@ -1025,6 +1031,194 @@
     }
   }
   analyzeBtn.addEventListener('click', runAnalysis);
+
+
+  // Phase 5.1 — smart spreadsheet structure detection
+  function cleanHeader(v, index){
+    const s = String(v ?? '').replace(/\s+/g,' ').trim();
+    return s || `Column ${index + 1}`;
+  }
+
+  function isLikelyDateHeader(h){
+    return /date|month|year|period|week|day/i.test(h);
+  }
+
+  function headerScore(row, rows){
+    if(!row || !row.length) return -Infinity;
+    const cells = row.map(v => String(v ?? '').trim());
+    const nonEmpty = cells.filter(Boolean).length;
+    if(nonEmpty < 2) return -Infinity;
+
+    const textCount = cells.filter(v => /[A-Za-z]/.test(v)).length;
+    const keywordCount = cells.filter(v =>
+      /date|region|zone|branch|channel|unit|business|sales|revenue|target|goal|amount|premium|anp|actual|product|customer|name|status|month|category|value|volume|achievement/i.test(v)
+    ).length;
+
+    const nextRows = rows.slice(rows.indexOf(row) + 1, rows.indexOf(row) + 4);
+    let numericEvidence = 0;
+    let populatedBelow = 0;
+    nextRows.forEach(r => {
+      if(!r) return;
+      const filled = r.filter(v => String(v ?? '').trim() !== '').length;
+      if(filled >= Math.max(2, Math.min(nonEmpty, 4))) populatedBelow++;
+      numericEvidence += r.filter(v => toNumber(v) !== null).length;
+    });
+
+    let score = 0;
+    score += Math.min(nonEmpty, 12) * 2;
+    score += textCount * 2;
+    score += keywordCount * 7;
+    score += populatedBelow * 8;
+    score += Math.min(numericEvidence, 12);
+    if(keywordCount >= 2) score += 10;
+    if(nonEmpty >= 3 && nonEmpty <= 20) score += 5;
+    return score;
+  }
+
+  function detectHeaderRow(rows){
+    const limit = Math.min(rows.length, 35);
+    let bestIndex = 0, bestScore = -Infinity;
+    for(let i=0;i<limit;i++){
+      const row = rows[i];
+      const score = headerScore(row, rows);
+      if(score > bestScore){
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+    // Prefer an early, strong row over a later decorative row.
+    if(bestIndex > 0){
+      const candidate = rows[bestIndex].map(v => String(v ?? '').trim()).filter(Boolean);
+      const keywordCount = candidate.filter(v => /date|region|zone|branch|channel|unit|business|sales|revenue|target|goal|amount|premium|anp|actual|product|customer|status|month|category|value|volume|achievement/i.test(v)).length;
+      if(keywordCount < 1){
+        for(let i=0;i<=bestIndex;i++){
+          const c = rows[i].map(v => String(v ?? '').trim()).filter(Boolean);
+          const k = c.filter(v => /date|region|zone|branch|channel|unit|business|sales|revenue|target|goal|amount|premium|anp|actual|product|customer|status|month|category|value|volume|achievement/i.test(v)).length;
+          if(k >= 2){ bestIndex=i; break; }
+        }
+      }
+    }
+    return bestIndex;
+  }
+
+  function normalizeRows(rows){
+    const headerIndex = detectHeaderRow(rows);
+    const rawHeader = rows[headerIndex] || [];
+    const width = Math.max(rawHeader.length, ...rows.slice(headerIndex + 1).map(r => r.length), 0);
+    const headers = Array.from({length: width}, (_,i) => cleanHeader(rawHeader[i], i));
+
+    // De-duplicate headers without destroying the original meaning.
+    const seen = {};
+    const uniqueHeaders = headers.map(h => {
+      const key = h.toLowerCase();
+      seen[key] = (seen[key] || 0) + 1;
+      return seen[key] === 1 ? h : `${h} ${seen[key]}`;
+    });
+
+    const data = rows.slice(headerIndex + 1)
+      .map(r => Array.from({length: width}, (_,i) => r[i] ?? ''))
+      .filter(r => r.some(v => String(v ?? '').trim() !== ''));
+
+    return {headerIndex, headers: uniqueHeaders, data};
+  }
+
+  function formatExcelDate(v){
+    if(typeof v !== 'number' || v < 20000 || v > 70000) return String(v ?? '');
+    // Excel serial date conversion; preserve as local ISO date for preview.
+    const utc = new Date(Date.UTC(1899, 11, 30) + v * 86400000);
+    if(Number.isNaN(utc.getTime())) return String(v);
+    return utc.toISOString().slice(0,10);
+  }
+
+  // Replace the Phase 5 analyzer with structure-aware logic.
+  const originalAnalyzeRows = analyzeRows;
+  analyzeRows = function(rows){
+    const normalized = normalizeRows(rows);
+    if(normalized.data.length < 1) throw new Error('Quantix X could not find a data region below the detected header row.');
+
+    const headers = normalized.headers;
+    const data = normalized.data;
+    const numeric = headers.map((h,i) => {
+      const vals = data.map(r => toNumber(r[i])).filter(v => v !== null);
+      return {h,i,vals,coverage:data.length ? vals.length/data.length : 0};
+    }).filter(x => x.coverage >= .55);
+
+    const business = numeric.find(x => /revenue|business|sales|amount|premium|anp|income|value|actual/i.test(x.h)) || numeric[0];
+    const target = numeric.find(x => /target|goal|plan|budget/i.test(x.h));
+    const region = headers.findIndex(h => /region|zone|branch|channel|unit|location|segment/i.test(h));
+    const avg = x => x.vals.reduce((a,b)=>a+b,0)/(x.vals.length||1);
+    const sum = x => x.vals.reduce((a,b)=>a+b,0);
+    const max = x => Math.max(...x.vals);
+    const min = x => Math.min(...x.vals);
+
+    let achievement = null;
+    if(business && target){
+      const bsum=sum(business), tsum=sum(target);
+      if(tsum) achievement = bsum/tsum*100;
+    }
+
+    let confidence = 82;
+    if(data.length >= 100) confidence += 5;
+    if(numeric.length >= 2) confidence += 4;
+    if(numeric.some(x => x.coverage > .9)) confidence += 3;
+    if(normalized.headerIndex === 0) confidence += 2;
+    confidence = Math.min(confidence, 98.7);
+
+    const firstNumeric = business;
+    const businessAvg = firstNumeric ? avg(firstNumeric) : null;
+    const businessMax = firstNumeric ? max(firstNumeric) : null;
+    const businessMin = firstNumeric ? min(firstNumeric) : null;
+
+    return {
+      headers,data,numeric,business,target,region,achievement,confidence,
+      businessAvg,businessMax,businessMin,
+      headerIndex: normalized.headerIndex
+    };
+  };
+
+  // Replace preview renderer so dates and actual headers are displayed cleanly.
+  renderPreview = function(a){
+    previewTable.innerHTML='';
+    const head=document.createElement('thead'), trh=document.createElement('tr');
+    a.headers.slice(0,8).forEach(h=>{const th=document.createElement('th'); th.textContent=h; trh.appendChild(th);});
+    head.appendChild(trh); previewTable.appendChild(head);
+    const body=document.createElement('tbody');
+    a.data.slice(0,5).forEach(row=>{
+      const tr=document.createElement('tr');
+      a.headers.slice(0,8).forEach((h,i)=>{
+        const td=document.createElement('td');
+        td.textContent = isLikelyDateHeader(h) ? formatExcelDate(row[i]) : String(row[i] ?? '—');
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    previewTable.appendChild(body);
+    dataProfile.classList.add('show');
+    profileNote.innerHTML = `<strong>${a.data.length.toLocaleString()} data rows · ${a.headers.length} columns</strong> · header row ${a.headerIndex + 1} detected automatically · first 5 rows shown locally`;
+  };
+
+  // Add a small structure-detection badge after successful analysis.
+  const resultCopyOriginal = resultCopy;
+  const originalRunAnalysis = runAnalysis;
+  runAnalysis = async function(){
+    await originalRunAnalysis();
+    // The existing function stores no analysis object globally, so re-read the file
+    // only for the lightweight header detection label.
+    const file = dataFile.files[0];
+    if(!file) return;
+    try{
+      const rows = await readRows(file);
+      const structure = normalizeRows(rows);
+      resultCopy.insertAdjacentHTML('afterend','<span class="structure-badge" id="structureBadge"><i></i>SMART HEADER DETECTED · ROW '+(structure.headerIndex+1)+'</span>');
+    }catch(_){}
+  };
+
+  // Ensure only one structure badge is present.
+  const observer = new MutationObserver(() => {
+    const badges = document.querySelectorAll('#structureBadge');
+    badges.forEach((b,i) => { if(i < badges.length-1) b.remove(); });
+  });
+  observer.observe(resultCopy.parentElement, {childList:true});
 
   // AI workspace demo
   const wsMessages = document.getElementById('wsMessages');
