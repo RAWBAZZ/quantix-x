@@ -415,6 +415,12 @@
   .structure-badge i{width:6px;height:6px;border-radius:50%;background:#5eead4}
   .profile-note strong{color:#aebbd0}
 
+
+  /* PHASE 6 — DATA-AWARE AI ANALYST */
+  .ws-data-context{display:none;margin:0 0 10px;padding:7px 9px;border-radius:8px;background:rgba(94,234,212,.045);border:1px solid rgba(94,234,212,.12);color:#8ce7d7;font:500 .57rem 'JetBrains Mono'}
+  .ws-data-context.show{display:block}
+  .ws-msg.ai .ws-source{display:block;margin-top:6px;color:#6f8198;font:500 .52rem 'JetBrains Mono'}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -596,8 +602,8 @@
               <div class="ws-msg ai"><b>QUANTIX X</b>I've reviewed the latest business signals. Ask me about performance, gaps, trends, or what needs attention next.</div>
             </div>
             <div class="ws-quick">
-              <button type="button" data-question="What is driving growth?">What is driving growth?</button>
-              <button type="button" data-question="What needs attention?">What needs attention?</button>
+              <button type="button" data-question="What is the total business?">What is the total business?</button>
+              <button type="button" data-question="Which region is best?">Which region is best?</button>
               <button type="button" data-question="Give me an executive summary">Executive summary</button>
             </div>
             <div class="ws-input">
@@ -1260,6 +1266,200 @@
   wsSend.addEventListener('click', () => askQuantix(wsInput.value));
   wsInput.addEventListener('keydown', e => { if(e.key === 'Enter') askQuantix(wsInput.value); });
   quickQuestions.forEach(btn => btn.addEventListener('click', () => askQuantix(btn.dataset.question)));
+
+
+
+  // Phase 6 — connect the AI Analyst UI to the locally analyzed dataset.
+  window.quantixDataset = null;
+
+  function qxSetDataset(a, fileName){
+    window.quantixDataset = { ...a, fileName };
+    const ctx = document.getElementById('wsDataContext');
+    if(ctx){
+      ctx.textContent = `DATA CONNECTED · ${a.data.length.toLocaleString()} ROWS · ${a.headers.length} COLUMNS`;
+      ctx.classList.add('show');
+    }
+  }
+
+  // Wrap the smart Phase 5.1 runner so the exact analyzed dataset becomes available
+  // to the AI Analyst after a successful upload.
+  const phase51RunAnalysis = runAnalysis;
+  runAnalysis = async function(){
+    await phase51RunAnalysis();
+    const file = dataFile.files[0];
+    if(!file) return;
+    try{
+      const rows = await readRows(file);
+      const analyzed = analyzeRows(rows);
+      qxSetDataset(analyzed, file.name);
+    }catch(_){}
+  };
+
+  // Replace the static AI answers with a deterministic, data-aware local analyst.
+  function qxNum(v){
+    return toNumber(v);
+  }
+
+  function qxFmt(v){
+    if(v === null || v === undefined || Number.isNaN(v)) return '—';
+    return Number(v).toLocaleString(undefined,{maximumFractionDigits:2});
+  }
+
+  function qxPct(v){
+    return Number(v).toLocaleString(undefined,{maximumFractionDigits:1}) + '%';
+  }
+
+  function qxFindColumn(a, pattern){
+    return a.headers.findIndex(h => pattern.test(h));
+  }
+
+  function qxColumnValues(a, idx){
+    return a.data.map(r => r[idx]).filter(v => String(v ?? '').trim() !== '');
+  }
+
+  function qxBestByGroup(a, groupIdx, metricIdx){
+    const groups = {};
+    a.data.forEach(r => {
+      const g = String(r[groupIdx] ?? '').trim();
+      const n = qxNum(r[metricIdx]);
+      if(!g || n === null) return;
+      groups[g] = (groups[g] || 0) + n;
+    });
+    return Object.entries(groups).sort((x,y)=>y[1]-x[1]);
+  }
+
+  function qxBelowTarget(a){
+    if(!a.business || !a.target) return [];
+    const items=[];
+    a.data.forEach(r=>{
+      const actual=qxNum(r[a.business.i]), target=qxNum(r[a.target.i]);
+      if(actual !== null && target !== null && target !== 0){
+        items.push({label:String(r[a.region >= 0 ? a.region : 0] ?? 'Row'), actual, target, pct:actual/target*100});
+      }
+    });
+    return items.filter(x=>x.pct<100).sort((x,y)=>x.pct-y.pct).slice(0,5);
+  }
+
+  function qxAnswer(question){
+    const a = window.quantixDataset;
+    if(!a){
+      return {text:'Upload and analyze an Excel or CSV file first. Once your data is connected, I can answer questions from the dataset directly.', source:'No dataset connected'};
+    }
+
+    const q = question.toLowerCase();
+    const business = a.business;
+    const target = a.target;
+    const groupIdx = a.region >= 0 ? a.region : qxFindColumn(a,/region|zone|branch|channel|unit|location|segment/i);
+
+    if(/what columns|which columns|fields|schema/.test(q)){
+      return {text:`I found ${a.headers.length} columns: ${a.headers.join(', ')}. ${a.numeric.length} are currently measurable numeric fields.`,source:`${a.fileName} · local schema analysis`};
+    }
+
+    if(/how many rows|row count|records|records are there/.test(q)){
+      return {text:`The connected dataset contains ${a.data.length.toLocaleString()} data rows across ${a.headers.length} columns.`,source:`${a.fileName} · local dataset profile`};
+    }
+
+    if(/total|sum/.test(q) && business){
+      const total = business.vals.reduce((s,v)=>s+v,0);
+      const label = business.h;
+      if(target){
+        const targetTotal = target.vals.reduce((s,v)=>s+v,0);
+        const ach = targetTotal ? total/targetTotal*100 : null;
+        return {text:`Total ${label} is ${qxFmt(total)}. The available ${target.h} totals ${qxFmt(targetTotal)}, giving ${ach===null?'—':qxPct(ach)} achievement.`,source:`${a.fileName} · ${label} + ${target.h}`};
+      }
+      return {text:`Total ${label} is ${qxFmt(total)} across ${a.data.length.toLocaleString()} rows.`,source:`${a.fileName} · ${label}`};
+    }
+
+    if(/average|avg|mean/.test(q) && business){
+      const avg = business.vals.reduce((s,v)=>s+v,0)/(business.vals.length||1);
+      return {text:`Average ${business.h} is ${qxFmt(avg)} across ${business.vals.length.toLocaleString()} numeric observations.`,source:`${a.fileName} · ${business.h}`};
+    }
+
+    if(/best|top|highest|strongest|leading|performing best/.test(q) && groupIdx >= 0 && business){
+      const ranked = qxBestByGroup(a, groupIdx, business.i);
+      if(ranked.length){
+        const top = ranked[0];
+        return {text:`${top[0]} is the strongest ${a.headers[groupIdx]} by ${business.h}, with ${qxFmt(top[1])} in the connected data.`,source:`${a.fileName} · grouped by ${a.headers[groupIdx]}`};
+      }
+    }
+
+    if(/below target|under target|attention|weak|worst|lowest/.test(q)){
+      const below = qxBelowTarget(a);
+      if(below.length){
+        const names = below.map(x=>`${x.label} (${qxPct(x.pct)})`).join(', ');
+        return {text:`I found ${below.length} row-level performance gaps below target. The largest gaps are: ${names}.`,source:`${a.fileName} · ${business?.h || 'actual'} vs ${target?.h || 'target'}`};
+      }
+      if(target && business) return {text:`No row-level values were found below target in the available actual-versus-target fields.`,source:`${a.fileName} · target comparison`};
+    }
+
+    if(/executive summary|summary|business pulse|overview/.test(q)){
+      let text = `The dataset contains ${a.data.length.toLocaleString()} rows and ${a.numeric.length} measurable fields.`;
+      if(business){
+        const total=business.vals.reduce((s,v)=>s+v,0);
+        text += ` Total ${business.h} is ${qxFmt(total)}.`;
+      }
+      if(a.achievement !== null) text += ` Overall target achievement is ${qxPct(a.achievement)}.`;
+      if(groupIdx >= 0 && business){
+        const ranked=qxBestByGroup(a,groupIdx,business.i);
+        if(ranked.length) text += ` ${ranked[0][0]} is the leading ${a.headers[groupIdx]} by ${business.h}.`;
+      }
+      const below=qxBelowTarget(a);
+      if(below.length) text += ` ${below.length} rows are below target and should be reviewed.`;
+      return {text,source:`${a.fileName} · executive local analysis`};
+    }
+
+    if(/target|achievement|attainment/.test(q) && business && target){
+      const totalB=business.vals.reduce((s,v)=>s+v,0);
+      const totalT=target.vals.reduce((s,v)=>s+v,0);
+      return {text:`${business.h} totals ${qxFmt(totalB)} against ${target.h} of ${qxFmt(totalT)} — ${totalT ? qxPct(totalB/totalT*100) : '—'} achievement.`,source:`${a.fileName} · target analysis`};
+    }
+
+    if(business){
+      return {text:`I can analyze ${business.h}, ${target ? target.h + ', ' : ''}${a.headers.slice(0,6).join(', ')} and the dataset structure. Try “What is the total business?”, “Which region is best?”, or “What is below target?”.`,source:`${a.fileName} · local AI analyst`};
+    }
+
+    return {text:`I found ${a.data.length.toLocaleString()} rows, but I could not confidently identify a primary business metric. Try asking about the available columns or connect a dataset with numeric KPI fields.`,source:`${a.fileName} · local analysis`};
+  }
+
+  // Upgrade the workspace UI with a connected-data indicator.
+  const wsChat = document.querySelector('.ws-chat');
+  if(wsChat && !document.getElementById('wsDataContext')){
+    const ctx = document.createElement('div');
+    ctx.id='wsDataContext';
+    ctx.className='ws-data-context';
+    wsChat.insertBefore(ctx, wsChat.querySelector('.ws-messages'));
+  }
+
+  // Rebind the existing workspace send/quick actions to the data-aware analyst.
+  const oldWsSend = wsSend;
+  const oldQuickQuestions = quickQuestions;
+  function askQuantixData(question){
+    const q=question.trim();
+    if(!q) return;
+    addWsMessage(q,'user');
+    wsInput.value='';
+    const thinking=document.createElement('div');
+    thinking.className='ws-msg ai';
+    thinking.innerHTML='<b>QUANTIX X</b>Analyzing your connected dataset…';
+    wsMessages.appendChild(thinking);
+    wsMessages.scrollTop=wsMessages.scrollHeight;
+    setTimeout(()=>{
+      const result=qxAnswer(q);
+      thinking.innerHTML='<b>QUANTIX X</b>' + result.text + `<span class="ws-source">${result.source}</span>`;
+      wsMessages.scrollTop=wsMessages.scrollHeight;
+    },650);
+  }
+
+  oldWsSend.replaceWith(oldWsSend.cloneNode(true));
+  const newWsSend=document.getElementById('wsSend');
+  newWsSend.addEventListener('click',()=>askQuantixData(wsInput.value));
+  wsInput.onkeydown=e=>{if(e.key==='Enter') askQuantixData(wsInput.value);};
+  oldQuickQuestions.forEach(btn=>{
+    btn.replaceWith(btn.cloneNode(true));
+  });
+  document.querySelectorAll('[data-question]').forEach(btn=>{
+    btn.addEventListener('click',()=>askQuantixData(btn.dataset.question));
+  });
 
 </script>
 
