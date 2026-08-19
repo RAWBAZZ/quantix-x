@@ -340,6 +340,59 @@
   @media(max-width:850px){.intake-shell{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:560px){.intake-card,.intake-result{padding:20px}.result-grid{grid-template-columns:1fr}.result-kpi:nth-child(n+2){display:none}}
 
+
+  /* QUANTIX X WORKSPACE */
+  .workspace-shell{display:grid;grid-template-columns:190px minmax(0,1fr) 245px;min-height:620px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#050a14;box-shadow:0 18px 60px rgba(0,0,0,.22)}
+  .workspace-nav{padding:18px 13px;border-right:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.018)}
+  .ws-brand{display:flex;align-items:center;gap:9px;padding:8px 9px 18px;font-family:'Space Grotesk';font-weight:600;font-size:.86rem}
+  .ws-mark{width:27px;height:27px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#04101d;font-weight:800}
+  .ws-label{padding:12px 9px 7px;color:var(--muted-2);font:600 .58rem 'JetBrains Mono';letter-spacing:.09em}
+  .ws-nav-btn{width:100%;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#8f9db2;padding:9px;border-radius:8px;font-size:.73rem;text-align:left;cursor:pointer}
+  .ws-nav-btn.active,.ws-nav-btn:hover{background:rgba(56,189,248,.08);color:#dcecff}
+  .ws-nav-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.75}
+  .workspace-main{display:flex;flex-direction:column;min-width:0}
+  .ws-topbar{height:58px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+  .ws-title{font:600 .78rem 'Space Grotesk';color:#dfe9f7}
+  .ws-status{display:flex;align-items:center;gap:7px;color:#7f8ca0;font:500 .61rem 'JetBrains Mono'}
+  .ws-live{width:7px;height:7px;border-radius:50%;background:#5eead4;box-shadow:0 0 12px rgba(94,234,212,.65)}
+  .ws-content{padding:24px 22px;overflow:hidden}
+  .ws-greeting{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+  .ws-greeting h3{font:600 1.28rem 'Space Grotesk';margin-bottom:5px}
+  .ws-greeting p{font-size:.73rem;color:var(--muted);line-height:1.5}
+  .ws-date{font:500 .6rem 'JetBrains Mono';color:var(--muted-2);white-space:nowrap}
+  .ws-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+  .ws-kpi{padding:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.022);border-radius:12px}
+  .ws-kpi span{display:block;color:var(--muted-2);font:500 .58rem 'JetBrains Mono'}
+  .ws-kpi strong{display:block;font:600 1.25rem 'Space Grotesk';margin-top:5px}
+  .ws-kpi em{display:block;color:#5eead4;font:500 .58rem 'JetBrains Mono';font-style:normal;margin-top:3px}
+  .ws-chat{margin-top:16px;border:1px solid rgba(255,255,255,.06);border-radius:14px;background:rgba(255,255,255,.018);padding:14px}
+  .ws-chat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .ws-chat-head b{font:600 .72rem 'Space Grotesk'}
+  .ws-chip{font:500 .56rem 'JetBrains Mono';color:var(--blue);padding:5px 7px;border-radius:7px;background:rgba(56,189,248,.08)}
+  .ws-messages{height:210px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding-right:4px}
+  .ws-msg{max-width:90%;padding:9px 11px;border-radius:10px;font-size:.68rem;line-height:1.45;color:#b9c6d8}
+  .ws-msg.ai{align-self:flex-start;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.1)}
+  .ws-msg.user{align-self:flex-end;background:rgba(255,255,255,.06);color:#dce7f5}
+  .ws-msg b{display:block;color:var(--blue);font:600 .56rem 'JetBrains Mono';margin-bottom:4px}
+  .ws-quick{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .ws-quick button{border:1px solid rgba(255,255,255,.08);background:transparent;color:#8f9db2;border-radius:7px;padding:6px 8px;font:500 .56rem 'JetBrains Mono';cursor:pointer}
+  .ws-quick button:hover{border-color:rgba(56,189,248,.25);color:#cfeeff}
+  .ws-input{display:flex;gap:7px}
+  .ws-input input{flex:1;min-width:0;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);color:#dbe8f7;border-radius:9px;padding:10px 11px;outline:none;font-size:.67rem}
+  .ws-input input:focus{border-color:rgba(56,189,248,.35)}
+  .ws-send{border:1px solid rgba(56,189,248,.2);background:rgba(56,189,248,.1);color:#7dd3fc;border-radius:9px;padding:0 12px;cursor:pointer}
+  .workspace-side{border-left:1px solid rgba(255,255,255,.06);padding:19px 15px;background:rgba(255,255,255,.012)}
+  .ws-side-title{font:600 .68rem 'Space Grotesk';margin-bottom:13px}
+  .ws-insight{padding:11px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02);margin-bottom:9px}
+  .ws-insight span{display:block;color:var(--blue);font:600 .54rem 'JetBrains Mono';margin-bottom:5px}
+  .ws-insight p{font-size:.64rem;line-height:1.45;color:#9aa8bb}
+  .ws-progress{margin-top:18px}
+  .ws-progress-row{display:flex;justify-content:space-between;color:#8794a8;font:500 .57rem 'JetBrains Mono';margin-bottom:6px}
+  .ws-progress-track{height:6px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+  .ws-progress-track i{display:block;height:100%;width:76%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+  @media(max-width:980px){.workspace-shell{grid-template-columns:165px minmax(0,1fr)}.workspace-side{display:none}}
+  @media(max-width:620px){.workspace-shell{grid-template-columns:1fr}.workspace-nav{display:none}.ws-content{padding:18px 14px}.ws-kpis{grid-template-columns:1fr 1fr}.ws-kpi:last-child{display:none}.ws-greeting{display:block}.ws-date{margin-top:8px}}
+
 </style>
 </head>
 <body>
@@ -355,7 +408,7 @@
   </div>
   <div class="nav-links">
     <a href="#features">Features</a>
-    <a href="#gallery">Dashboards</a><a href="#intake">Data Intake</a>
+    <a href="#gallery">Dashboards</a><a href="#intake">Data Intake</a><a href="#workspace">AI Workspace</a>
     <a href="#chat">AI Demo</a>
     <a href="#solutions">Solutions</a>
     <a href="#pricing">Pricing</a>
@@ -464,6 +517,78 @@
           <div class="result-item"><b>03 · OUTPUT</b><span id="signal3">Executive summary, KPI dashboard, and report-ready insights.</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- AI WORKSPACE -->
+<section id="workspace">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="section-tag">Product Preview</div>
+      <h2 class="display">Meet your AI business analyst</h2>
+      <p>Ask questions in plain English. Quantix X turns business context into focused answers, signals, and next actions.</p>
+    </div>
+
+    <div class="workspace-shell reveal">
+      <aside class="workspace-nav" aria-label="Workspace navigation">
+        <div class="ws-brand"><span class="ws-mark">Q</span> Quantix X</div>
+        <div class="ws-label">WORKSPACE</div>
+        <button class="ws-nav-btn active" type="button"><i class="ws-nav-dot"></i>Overview</button>
+        <button class="ws-nav-btn" type="button"><i class="ws-nav-dot"></i>AI Analyst</button>
+        <button class="ws-nav-btn" type="button"><i class="ws-nav-dot"></i>Dashboards</button>
+        <button class="ws-nav-btn" type="button"><i class="ws-nav-dot"></i>Reports</button>
+        <div class="ws-label">DATA</div>
+        <button class="ws-nav-btn" type="button"><i class="ws-nav-dot"></i>Sources</button>
+        <button class="ws-nav-btn" type="button"><i class="ws-nav-dot"></i>Automations</button>
+      </aside>
+
+      <main class="workspace-main">
+        <div class="ws-topbar">
+          <span class="ws-title">Executive Intelligence</span>
+          <span class="ws-status"><i class="ws-live"></i>AI ENGINE ONLINE</span>
+        </div>
+        <div class="ws-content">
+          <div class="ws-greeting">
+            <div><h3>Good evening. Here's your business pulse.</h3><p>Quantix X has identified the highest-impact signals across your connected data.</p></div>
+            <span class="ws-date">20 AUG 2026 · 23:41 IST</span>
+          </div>
+
+          <div class="ws-kpis">
+            <div class="ws-kpi"><span>MTD BUSINESS</span><strong>₹20.0 Cr</strong><em>↑ 12.8% vs target</em></div>
+            <div class="ws-kpi"><span>ACTIVE UNITS</span><strong>27</strong><em>↑ 8.4% this month</em></div>
+            <div class="ws-kpi"><span>FORECAST</span><strong>₹24.6 Cr</strong><em>94.2% confidence</em></div>
+          </div>
+
+          <div class="ws-chat">
+            <div class="ws-chat-head"><b>Ask Quantix X</b><span class="ws-chip">NATURAL LANGUAGE</span></div>
+            <div class="ws-messages" id="wsMessages" aria-live="polite">
+              <div class="ws-msg ai"><b>QUANTIX X</b>I've reviewed the latest business signals. Ask me about performance, gaps, trends, or what needs attention next.</div>
+            </div>
+            <div class="ws-quick">
+              <button type="button" data-question="What is driving growth?">What is driving growth?</button>
+              <button type="button" data-question="What needs attention?">What needs attention?</button>
+              <button type="button" data-question="Give me an executive summary">Executive summary</button>
+            </div>
+            <div class="ws-input">
+              <input id="wsInput" aria-label="Ask Quantix X" placeholder="Ask Quantix X anything about your data…">
+              <button class="ws-send" id="wsSend" type="button" aria-label="Send question">→</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="workspace-side">
+        <div class="ws-side-title">AI Signals</div>
+        <div class="ws-insight"><span>GROWTH DRIVER</span><p>West region is contributing the strongest incremental business this month.</p></div>
+        <div class="ws-insight"><span>WATCHLIST</span><p>Two units are tracking below the expected run-rate and need intervention.</p></div>
+        <div class="ws-insight"><span>NEXT BEST ACTION</span><p>Prioritize high-intent cases before the next reporting cycle.</p></div>
+        <div class="ws-progress">
+          <div class="ws-progress-row"><span>Target attainment</span><b>76%</b></div>
+          <div class="ws-progress-track"><i></i></div>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
@@ -756,6 +881,48 @@
       }
     }, 420);
   });
+
+
+  // AI workspace demo
+  const wsMessages = document.getElementById('wsMessages');
+  const wsInput = document.getElementById('wsInput');
+  const wsSend = document.getElementById('wsSend');
+  const quickQuestions = document.querySelectorAll('[data-question]');
+
+  const wsAnswers = {
+    'What is driving growth?':'Growth is being led by the West region, stronger active-unit productivity, and improved conversion in the latest reporting cycle.',
+    'What needs attention?':'Two units are below run-rate. Quantix X recommends focusing on pending high-intent cases before the next reporting cycle.',
+    'Give me an executive summary':'MTD business is ₹20.0 Cr, tracking 12.8% above target. Forecast is ₹24.6 Cr with 94.2% confidence. West is the strongest growth driver while two units remain on the watchlist.'
+  };
+
+  function addWsMessage(text, type){
+    const el = document.createElement('div');
+    el.className = 'ws-msg ' + type;
+    el.innerHTML = type === 'ai' ? '<b>QUANTIX X</b>' + text : text;
+    wsMessages.appendChild(el);
+    wsMessages.scrollTop = wsMessages.scrollHeight;
+  }
+
+  function askQuantix(question){
+    const q = question.trim();
+    if(!q) return;
+    addWsMessage(q, 'user');
+    wsInput.value = '';
+    const thinking = document.createElement('div');
+    thinking.className = 'ws-msg ai';
+    thinking.innerHTML = '<b>QUANTIX X</b>Analyzing business context…';
+    wsMessages.appendChild(thinking);
+    wsMessages.scrollTop = wsMessages.scrollHeight;
+    setTimeout(() => {
+      const answer = wsAnswers[q] || 'I would connect this question to your business data, compare the relevant KPIs and return the highest-impact insight with a recommended next action.';
+      thinking.innerHTML = '<b>QUANTIX X</b>' + answer;
+      wsMessages.scrollTop = wsMessages.scrollHeight;
+    }, 850);
+  }
+
+  wsSend.addEventListener('click', () => askQuantix(wsInput.value));
+  wsInput.addEventListener('keydown', e => { if(e.key === 'Enter') askQuantix(wsInput.value); });
+  quickQuestions.forEach(btn => btn.addEventListener('click', () => askQuantix(btn.dataset.question)));
 
 </script>
 
