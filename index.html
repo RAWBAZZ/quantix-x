@@ -415,251 +415,38 @@
   .structure-badge i{width:6px;height:6px;border-radius:50%;background:#5eead4}
   .profile-note strong{color:#aebbd0}
 
-
-  /* PHASE 6 — DATA-AWARE AI ANALYST */
-  .ws-data-context{display:none;margin:0 0 10px;padding:7px 9px;border-radius:8px;background:rgba(94,234,212,.045);border:1px solid rgba(94,234,212,.12);color:#8ce7d7;font:500 .57rem 'JetBrains Mono'}
-  .ws-data-context.show{display:block}
-  .ws-msg.ai .ws-source{display:block;margin-top:6px;color:#6f8198;font:500 .52rem 'JetBrains Mono'}
-
-
-  /* PHASE 6.1 — EXECUTIVE DASHBOARD GENERATOR */
-  .exec-dashboard{display:none;margin-top:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:#07101d;padding:18px}
-  .exec-dashboard.show{display:block}
-  .exec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:15px}
-  .exec-head h4{font:600 1.05rem 'Space Grotesk'}
-  .exec-head p{color:var(--muted);font-size:.65rem;margin-top:4px}
-  .exec-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-  .exec-actions button{border:1px solid rgba(56,189,248,.18);background:rgba(56,189,248,.06);color:#8edcff;border-radius:8px;padding:7px 9px;font:600 .55rem 'JetBrains Mono';cursor:pointer}
-  .exec-actions button:hover{background:rgba(56,189,248,.12)}
-  .exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-  .exec-kpi{padding:11px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055)}
-  .exec-kpi span{display:block;color:var(--muted-2);font:500 .52rem 'JetBrains Mono'}
-  .exec-kpi strong{display:block;font:600 1rem 'Space Grotesk';margin-top:4px}
-  .exec-kpi em{display:block;color:#5eead4;font:500 .52rem 'JetBrains Mono';font-style:normal;margin-top:3px}
-  .exec-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:9px;margin-top:9px}
-  .exec-panel{padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018)}
-  .exec-panel h5{font:600 .62rem 'Space Grotesk';margin-bottom:9px;color:#dbe8f7}
-  .exec-bars{display:flex;align-items:flex-end;gap:6px;height:125px}
-  .exec-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:5px}
-  .exec-bar{width:100%;max-width:28px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--cyan),var(--blue));min-height:3px}
-  .exec-bar-col span{font:500 .48rem 'JetBrains Mono';color:#728198}
-  .exec-table{width:100%;border-collapse:collapse;font-size:.55rem}
-  .exec-table th,.exec-table td{padding:6px 5px;border-bottom:1px solid rgba(255,255,255,.05);text-align:left}
-  .exec-table th{color:#7dd3fc;font:600 .49rem 'JetBrains Mono'}
-  .exec-table td{color:#9eacc0}
-  .exec-summary{margin-top:9px;padding:11px;border-radius:10px;border:1px solid rgba(94,234,212,.12);background:rgba(94,234,212,.035);font-size:.62rem;line-height:1.5;color:#aebdce}
-  .exec-summary b{color:#5eead4;font-family:'JetBrains Mono'}
-  .exec-empty{padding:25px;text-align:center;color:var(--muted);font-size:.65rem}
-  @media(max-width:650px){.exec-kpis{grid-template-columns:1fr 1fr}.exec-grid{grid-template-columns:1fr}.exec-head{display:block}.exec-actions{justify-content:flex-start;margin-top:10px}}
-
 </style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-  // Phase 6.1 — real executive dashboard + export actions
-  function qxEsc(s){
-    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-  function qxBuildDashboard(a){
-    if(!a) throw new Error('Connect and analyze a dataset first.');
-    const business = a.business;
-    const target = a.target;
-    const groupIdx = a.region >= 0 ? a.region : qxFindColumn(a,/region|zone|branch|channel|unit|location|segment/i);
-    const total = business ? business.vals.reduce((s,v)=>s+v,0) : 0;
-    const targetTotal = target ? target.vals.reduce((s,v)=>s+v,0) : 0;
-    const achievement = targetTotal ? total/targetTotal*100 : null;
-    const avg = business && business.vals.length ? total/business.vals.length : 0;
-
-    let groups=[];
-    if(groupIdx >= 0 && business) groups = qxBestByGroup(a,groupIdx,business.i).slice(0,8);
-
-    const recent = business ? business.vals.slice(-7) : [];
-    const maxRecent = recent.length ? Math.max(...recent) : 1;
-    const minRecent = recent.length ? Math.min(...recent) : 0;
-    const confidence = a.confidence || 0;
-
-    const rows = groups.length
-      ? groups.map((g,i)=>`<tr><td>${i+1}</td><td>${qxEsc(g[0])}</td><td>${qxFmt(g[1])}</td><td>${total ? qxPct(g[1]/total*100) : '—'}</td></tr>`).join('')
-      : `<tr><td colspan="4">No grouping field detected.</td></tr>`;
-
-    const bars = recent.map((v,i)=>{
-      const h = Math.max(5, Math.round((v/(maxRecent||1))*100));
-      return `<div class="exec-bar-col"><div class="exec-bar" style="height:${h}%"></div><span>D${i+1}</span></div>`;
-    }).join('');
-
-    const summary = [
-      business ? `Total <b>${qxEsc(business.h)}</b> is <b>${qxFmt(total)}</b> across ${a.data.length.toLocaleString()} rows.` : `The dataset contains ${a.data.length.toLocaleString()} rows.`,
-      achievement !== null ? `Target achievement is <b>${qxPct(achievement)}</b>.` : '',
-      groups.length ? `<b>${qxEsc(groups[0][0])}</b> is the leading ${qxEsc(a.headers[groupIdx])} by ${qxEsc(business.h)}.` : '',
-      recent.length >= 2 ? `The latest 7 observations range from <b>${qxFmt(minRecent)}</b> to <b>${qxFmt(maxRecent)}</b>.` : '',
-      `Local analysis confidence: <b>${qxPct(confidence)}</b>.`
-    ].filter(Boolean).join(' ');
-
-    return `
-      <div class="exec-kpis">
-        <div class="exec-kpi"><span>${qxEsc(business?.h || 'ROWS')}</span><strong>${business ? qxFmt(total) : a.data.length.toLocaleString()}</strong><em>${business ? 'total' : 'records'}</em></div>
-        <div class="exec-kpi"><span>TARGET</span><strong>${target ? qxFmt(targetTotal) : '—'}</strong><em>${target ? (achievement !== null ? qxPct(achievement) + ' achievement' : 'detected') : 'not detected'}</em></div>
-        <div class="exec-kpi"><span>AVG / ROW</span><strong>${business ? qxFmt(avg) : '—'}</strong><em>${business ? 'primary metric' : '—'}</em></div>
-        <div class="exec-kpi"><span>AI CONFIDENCE</span><strong>${qxPct(confidence)}</strong><em>local analysis</em></div>
-      </div>
-      <div class="exec-grid">
-        <div class="exec-panel"><h5>7-Observation Trend</h5><div class="exec-bars">${bars || '<div class="exec-empty">No numeric trend available.</div>'}</div></div>
-        <div class="exec-panel"><h5>Top Performance</h5><table class="exec-table"><thead><tr><th>#</th><th>${groupIdx>=0?qxEsc(a.headers[groupIdx]):'GROUP'}</th><th>${business?qxEsc(business.h):'VALUE'}</th><th>SHARE</th></tr></thead><tbody>${rows}</tbody></table></div>
-      </div>
-      <div class="exec-summary"><b>AI EXECUTIVE SUMMARY</b><br>${summary}</div>
-    `;
-  }
-
-  function qxShowDashboard(){
-    const dash=document.getElementById('execDashboard');
-    const body=document.getElementById('execDashboardBody');
-    if(!dash || !body) return;
-    try{
-      body.innerHTML=qxBuildDashboard(window.quantixDataset);
-      document.getElementById('execMeta').textContent = `Generated locally from ${window.quantixDataset.fileName} · ${new Date().toLocaleString()}`;
-      dash.classList.add('show');
-      dash.scrollIntoView({behavior:'smooth',block:'center'});
-    }catch(e){
-      body.innerHTML=`<div class="exec-empty">${qxEsc(e.message)}</div>`;
-      dash.classList.add('show');
-    }
-  }
-
-  function qxDashboardHtmlForExport(){
-    const a=window.quantixDataset;
-    if(!a) throw new Error('Analyze a dataset first.');
-    const body=qxBuildDashboard(a);
-    return `<!doctype html><html><head><meta charset="utf-8"><title>Quantix X Executive Dashboard</title>
-    <style>body{margin:0;background:#050a14;color:#dce8f7;font-family:Arial,sans-serif;padding:30px}h1{margin:0 0 6px;font-size:26px}.meta{color:#8ea0b8;font-size:12px;margin-bottom:22px}.exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.exec-kpi,.exec-panel,.exec-summary{border:1px solid #1a2b40;background:#0a1423;border-radius:12px;padding:14px}.exec-kpi span,.exec-panel h5{font-size:10px;color:#7dd3fc;text-transform:uppercase}.exec-kpi strong{display:block;font-size:22px;margin:7px 0}.exec-kpi em{font-size:10px;color:#5eead4;font-style:normal}.exec-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}.exec-bars{display:flex;align-items:flex-end;gap:8px;height:160px}.exec-bar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px}.exec-bar{width:100%;max-width:35px;background:linear-gradient(#22d3ee,#3b82f6);border-radius:5px 5px 0 0}.exec-bar-col span{font-size:9px;color:#8ea0b8}.exec-table{width:100%;border-collapse:collapse;font-size:10px}.exec-table th,.exec-table td{padding:8px;border-bottom:1px solid #1a2b40;text-align:left}.exec-table th{color:#7dd3fc}.exec-summary{margin-top:12px;line-height:1.6;font-size:11px}.exec-summary b{color:#5eead4}</style>
 <style>
-.exec-actions button:disabled{opacity:.5;pointer-events:none}
-.exec-status{display:none;margin-top:8px;color:#5eead4;font:500 .56rem 'JetBrains Mono'}
-.exec-status.show{display:block}
+  .qx-exec{display:none;margin-top:16px;padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:#07101d}
+  .qx-exec.show{display:block}
+  .qx-exec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .qx-exec-title{font:600 1rem 'Space Grotesk';color:#e8f3ff}
+  .qx-exec-meta{margin-top:4px;color:#7e91aa;font:500 .55rem 'JetBrains Mono'}
+  .qx-exec-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .qx-exec-actions button{border:1px solid rgba(56,189,248,.18);background:rgba(56,189,248,.06);color:#8edcff;border-radius:8px;padding:7px 9px;font:600 .53rem 'JetBrains Mono'}
+  .qx-exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .qx-exec-card{padding:11px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.055)}
+  .qx-exec-card span{display:block;color:#71839b;font:500 .5rem 'JetBrains Mono'}
+  .qx-exec-card strong{display:block;margin-top:4px;color:#fff;font:600 .95rem 'Space Grotesk'}
+  .qx-exec-card em{display:block;margin-top:3px;color:#5eead4;font:500 .5rem 'JetBrains Mono';font-style:normal}
+  .qx-exec-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:8px;margin-top:8px}
+  .qx-exec-panel{padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018)}
+  .qx-exec-panel h5{margin:0 0 8px;color:#dbe8f7;font:600 .58rem 'Space Grotesk'}
+  .qx-bars{height:120px;display:flex;align-items:flex-end;gap:7px}
+  .qx-bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+  .qx-bar{width:22px;max-width:70%;background:#22d3ee;border-radius:4px 4px 1px 1px;min-height:3px}
+  .qx-bar-col small{color:#71839b;font:500 .46rem 'JetBrains Mono'}
+  .qx-table{width:100%;border-collapse:collapse;font-size:.53rem}
+  .qx-table th,.qx-table td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.05);text-align:left}
+  .qx-table th{color:#7dd3fc;font:600 .48rem 'JetBrains Mono'}
+  .qx-table td{color:#aebbd0}
+  .qx-summary{margin-top:8px;padding:10px;border:1px solid rgba(94,234,212,.12);background:rgba(94,234,212,.035);border-radius:10px;color:#b6c6d8;font-size:.58rem;line-height:1.5}
+  .qx-summary b{color:#5eead4;font-family:'JetBrains Mono'}
+  .qx-export-status{margin-top:7px;color:#5eead4;font:500 .5rem 'JetBrains Mono'}
+  @media(max-width:650px){.qx-exec-kpis{grid-template-columns:1fr 1fr}.qx-exec-grid{grid-template-columns:1fr}.qx-exec-head{display:block}.qx-exec-actions{margin-top:9px}}
 </style>
-
-</head><body>
-    <h1>Quantix X — Executive Performance Dashboard</h1><div class="meta">${qxEsc(a.fileName)} · ${new Date().toLocaleString()}</div>${body}</body></html>`;
-  }
-
-  function qxDownloadBlob(blob, name){
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
-  }
-
-  function qxDownloadDashboardHtml(){
-    const html=qxDashboardHtmlForExport();
-    qxDownloadBlob(new Blob([html],{type:'text/html'}),'quantix-x-executive-dashboard.html');
-  }
-
-  async function qxExportXlsx(){
-    const a=window.quantixDataset;
-    if(!a) throw new Error('Analyze a dataset first.');
-    if(!window.XLSX) throw new Error('Excel export library is unavailable.');
-    const wb=XLSX.utils.book_new();
-    const summary=[
-      ['Quantix X Executive Dashboard'],
-      ['Source',a.fileName],
-      ['Rows',a.data.length],
-      ['Columns',a.headers.length],
-      ['Confidence',a.confidence],
-      [],
-      ['Metric','Value'],
-      [a.business?.h || 'Primary Metric', a.business ? a.business.vals.reduce((s,v)=>s+v,0) : ''],
-      [a.target?.h || 'Target', a.target ? a.target.vals.reduce((s,v)=>s+v,0) : ''],
-      ['Achievement %', a.achievement ?? '']
-    ];
-    const ws=XLSX.utils.aoa_to_sheet(summary);
-    XLSX.utils.book_append_sheet(wb,ws,'Executive Summary');
-    const raw=XLSX.utils.aoa_to_sheet([a.headers,...a.data]);
-    XLSX.utils.book_append_sheet(wb,raw,'Source Preview');
-    XLSX.writeFile(wb,'quantix-x-executive-dashboard.xlsx');
-  }
-
-  function qxLoadScript(src){
-    return new Promise((resolve,reject)=>{
-      const s=document.createElement('script'); s.src=src; s.onload=resolve; s.onerror=reject; document.head.appendChild(s);
-    });
-  }
-
-  async function qxExportPptx(){
-    const a=window.quantixDataset;
-    if(!a) throw new Error('Analyze a dataset first.');
-    if(!window.PptxGenJS) await qxLoadScript('https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js');
-    const pptx=new PptxGenJS();
-    pptx.layout='LAYOUT_WIDE';
-    pptx.author='Quantix X';
-    pptx.subject='Executive Business Intelligence';
-    const slide=pptx.addSlide();
-    slide.background={color:'050A14'};
-    slide.addText('Quantix X',{x:.55,y:.4,w:2,h:.35,fontFace:'Aptos Display',fontSize:22,bold:true,color:'22D3EE'});
-    slide.addText('Executive Performance Dashboard',{x:.55,y:.85,w:8,h:.45,fontSize:24,bold:true,color:'E6F1FF'});
-    slide.addText(`${a.fileName} · ${new Date().toLocaleDateString()}`,{x:.55,y:1.35,w:7,h:.25,fontSize:9,color:'8EA0B8'});
-    const total=a.business?a.business.vals.reduce((s,v)=>s+v,0):0;
-    const target=a.target?a.target.vals.reduce((s,v)=>s+v,0):0;
-    const cards=[
-      ['PRIMARY METRIC',a.business?qxFmt(total):String(a.data.length)],
-      ['TARGET',a.target?qxFmt(target):'—'],
-      ['ACHIEVEMENT',a.achievement!==null?qxPct(a.achievement):'—'],
-      ['CONFIDENCE',qxPct(a.confidence)]
-    ];
-    cards.forEach((c,i)=>{
-      const x=.55+i*3.1;
-      slide.addShape(pptx.ShapeType.roundRect,{x,y:1.85,w:2.75,h:1.0,rectRadius:.08,fill:{color:'0A1423'},line:{color:'1A2B40',transparency:20}});
-      slide.addText(c[0],{x:x+.15,y:2.02,w:2.4,h:.18,fontSize:8,color:'7DD3FC',bold:true});
-      slide.addText(c[1],{x:x+.15,y:2.28,w:2.4,h:.28,fontSize:18,color:'FFFFFF',bold:true});
-    });
-    slide.addText('AI Executive Summary',{x:.55,y:3.25,w:3,h:.3,fontSize:14,color:'5EEAD4',bold:true});
-    let summary=`${a.data.length.toLocaleString()} rows analyzed. `;
-    if(a.business) summary+=`Total ${a.business.h}: ${qxFmt(total)}. `;
-    if(a.achievement!==null) summary+=`Target achievement: ${qxPct(a.achievement)}. `;
-    slide.addText(summary,{x:.55,y:3.65,w:11.8,h:1.0,fontSize:13,color:'B7C6D8',breakLine:false,fit:'shrink'});
-    slide.addText('Generated by Quantix X',{x:.55,y:6.95,w:3,h:.2,fontSize:8,color:'62738A'});
-    await pptx.writeFile({fileName:'quantix-x-executive-dashboard.pptx'});
-  }
-
-  // Dashboard generation from the AI quick prompt.
-  const originalAskQuantixData = askQuantixData;
-  askQuantixData = function(question){
-    if(/generate.*dashboard|executive dashboard|build.*dashboard/i.test(question)){
-      if(!window.quantixDataset){
-        addWsMessage(question,'user');
-        setTimeout(()=>addWsMessage('Please upload and analyze your Excel/CSV file first. Then I can generate the executive dashboard from the connected data.','ai'),450);
-        return;
-      }
-      addWsMessage(question,'user');
-      const thinking=document.createElement('div'); thinking.className='ws-msg ai';
-      thinking.innerHTML='<b>QUANTIX X</b>Generating your executive dashboard from the connected dataset…';
-      wsMessages.appendChild(thinking); wsMessages.scrollTop=wsMessages.scrollHeight;
-      setTimeout(()=>{
-        qxShowDashboard();
-        thinking.innerHTML='<b>QUANTIX X</b>Done — your executive dashboard is ready below.<span class="ws-source">Live from connected dataset · export controls available</span>';
-        wsMessages.scrollTop=wsMessages.scrollHeight;
-      },700);
-      return;
-    }
-    return originalAskQuantixData(question);
-  };
-
-  // Attach export controls once dashboard is generated.
-  document.getElementById('viewExecBtn')?.addEventListener('click',()=>qxShowDashboard());
-  document.getElementById('xlsxExecBtn')?.addEventListener('click',async()=>{
-    try{await qxExportXlsx()}catch(e){alert(e.message)}
-  });
-  document.getElementById('pptExecBtn')?.addEventListener('click',async()=>{
-    try{await qxExportPptx()}catch(e){alert('PPTX export failed: '+e.message)}
-  });
-  document.getElementById('pdfExecBtn')?.addEventListener('click',()=>{
-    try{
-      const html=qxDashboardHtmlForExport();
-      const w=window.open('','_blank');
-      if(!w){alert('Please allow pop-ups to export PDF.');return;}
-      w.document.write(html.replace('</head>','<style>@page{size:A4 landscape;margin:12mm}</style></head>'));
-      w.document.close();
-      setTimeout(()=>w.print(),500);
-    }catch(e){alert(e.message)}
-  });
-
-</script>
 </head>
 <body>
 
@@ -839,8 +626,8 @@
               <div class="ws-msg ai"><b>QUANTIX X</b>I've reviewed the latest business signals. Ask me about performance, gaps, trends, or what needs attention next.</div>
             </div>
             <div class="ws-quick">
-              <button type="button" data-question="What is the total business?">What is the total business?</button>
-              <button type="button" data-question="Which region is best?">Which region is best?</button>
+              <button type="button" data-question="What is driving growth?">What is driving growth?</button>
+              <button type="button" data-question="What needs attention?">What needs attention?</button>
               <button type="button" data-question="Give me an executive summary">Executive summary</button>
             </div>
             <div class="ws-input">
@@ -866,22 +653,22 @@
 </section>
 
 
-<div class="exec-dashboard" id="execDashboard">
-  <div class="exec-head">
+<div class="qx-exec" id="qxExecDashboard">
+  <div class="qx-exec-head">
     <div>
-      <h4>Executive Performance Dashboard</h4>
-      <p id="execMeta">Generated from connected business data</p>
+      <div class="qx-exec-title">Executive Performance Dashboard</div>
+      <div class="qx-exec-meta" id="qxExecMeta">Waiting for connected data</div>
     </div>
-    <div class="exec-actions">
-      <button type="button" id="viewExecBtn">↗ Open</button>
-      <button type="button" id="pdfExecBtn">↓ PDF</button>
-      <button type="button" id="pptExecBtn">↓ PPTX</button>
-      <button type="button" id="xlsxExecBtn">↓ Excel</button>
+    <div class="qx-exec-actions">
+      <button type="button" id="qxExecOpen">↗ Open</button>
+      <button type="button" id="qxExecPdf">↓ PDF</button>
+      <button type="button" id="qxExecPptx">↓ PPTX</button>
+      <button type="button" id="qxExecXlsx">↓ Excel</button>
     </div>
   </div>
-  <div id="execDashboardBody"></div>
+  <div id="qxExecBody"></div>
+  <div class="qx-export-status" id="qxExecStatus"></div>
 </div>
-
 <!-- GALLERY -->
 <section id="gallery">
   <div class="section-inner">
@@ -1521,200 +1308,6 @@
   wsInput.addEventListener('keydown', e => { if(e.key === 'Enter') askQuantix(wsInput.value); });
   quickQuestions.forEach(btn => btn.addEventListener('click', () => askQuantix(btn.dataset.question)));
 
-
-
-  // Phase 6 — connect the AI Analyst UI to the locally analyzed dataset.
-  window.quantixDataset = null;
-
-  function qxSetDataset(a, fileName){
-    window.quantixDataset = { ...a, fileName };
-    const ctx = document.getElementById('wsDataContext');
-    if(ctx){
-      ctx.textContent = `DATA CONNECTED · ${a.data.length.toLocaleString()} ROWS · ${a.headers.length} COLUMNS`;
-      ctx.classList.add('show');
-    }
-  }
-
-  // Wrap the smart Phase 5.1 runner so the exact analyzed dataset becomes available
-  // to the AI Analyst after a successful upload.
-  const phase51RunAnalysis = runAnalysis;
-  runAnalysis = async function(){
-    await phase51RunAnalysis();
-    const file = dataFile.files[0];
-    if(!file) return;
-    try{
-      const rows = await readRows(file);
-      const analyzed = analyzeRows(rows);
-      qxSetDataset(analyzed, file.name);
-    }catch(_){}
-  };
-
-  // Replace the static AI answers with a deterministic, data-aware local analyst.
-  function qxNum(v){
-    return toNumber(v);
-  }
-
-  function qxFmt(v){
-    if(v === null || v === undefined || Number.isNaN(v)) return '—';
-    return Number(v).toLocaleString(undefined,{maximumFractionDigits:2});
-  }
-
-  function qxPct(v){
-    return Number(v).toLocaleString(undefined,{maximumFractionDigits:1}) + '%';
-  }
-
-  function qxFindColumn(a, pattern){
-    return a.headers.findIndex(h => pattern.test(h));
-  }
-
-  function qxColumnValues(a, idx){
-    return a.data.map(r => r[idx]).filter(v => String(v ?? '').trim() !== '');
-  }
-
-  function qxBestByGroup(a, groupIdx, metricIdx){
-    const groups = {};
-    a.data.forEach(r => {
-      const g = String(r[groupIdx] ?? '').trim();
-      const n = qxNum(r[metricIdx]);
-      if(!g || n === null) return;
-      groups[g] = (groups[g] || 0) + n;
-    });
-    return Object.entries(groups).sort((x,y)=>y[1]-x[1]);
-  }
-
-  function qxBelowTarget(a){
-    if(!a.business || !a.target) return [];
-    const items=[];
-    a.data.forEach(r=>{
-      const actual=qxNum(r[a.business.i]), target=qxNum(r[a.target.i]);
-      if(actual !== null && target !== null && target !== 0){
-        items.push({label:String(r[a.region >= 0 ? a.region : 0] ?? 'Row'), actual, target, pct:actual/target*100});
-      }
-    });
-    return items.filter(x=>x.pct<100).sort((x,y)=>x.pct-y.pct).slice(0,5);
-  }
-
-  function qxAnswer(question){
-    const a = window.quantixDataset;
-    if(!a){
-      return {text:'Upload and analyze an Excel or CSV file first. Once your data is connected, I can answer questions from the dataset directly.', source:'No dataset connected'};
-    }
-
-    const q = question.toLowerCase();
-    const business = a.business;
-    const target = a.target;
-    const groupIdx = a.region >= 0 ? a.region : qxFindColumn(a,/region|zone|branch|channel|unit|location|segment/i);
-
-    if(/what columns|which columns|fields|schema/.test(q)){
-      return {text:`I found ${a.headers.length} columns: ${a.headers.join(', ')}. ${a.numeric.length} are currently measurable numeric fields.`,source:`${a.fileName} · local schema analysis`};
-    }
-
-    if(/how many rows|row count|records|records are there/.test(q)){
-      return {text:`The connected dataset contains ${a.data.length.toLocaleString()} data rows across ${a.headers.length} columns.`,source:`${a.fileName} · local dataset profile`};
-    }
-
-    if(/total|sum/.test(q) && business){
-      const total = business.vals.reduce((s,v)=>s+v,0);
-      const label = business.h;
-      if(target){
-        const targetTotal = target.vals.reduce((s,v)=>s+v,0);
-        const ach = targetTotal ? total/targetTotal*100 : null;
-        return {text:`Total ${label} is ${qxFmt(total)}. The available ${target.h} totals ${qxFmt(targetTotal)}, giving ${ach===null?'—':qxPct(ach)} achievement.`,source:`${a.fileName} · ${label} + ${target.h}`};
-      }
-      return {text:`Total ${label} is ${qxFmt(total)} across ${a.data.length.toLocaleString()} rows.`,source:`${a.fileName} · ${label}`};
-    }
-
-    if(/average|avg|mean/.test(q) && business){
-      const avg = business.vals.reduce((s,v)=>s+v,0)/(business.vals.length||1);
-      return {text:`Average ${business.h} is ${qxFmt(avg)} across ${business.vals.length.toLocaleString()} numeric observations.`,source:`${a.fileName} · ${business.h}`};
-    }
-
-    if(/best|top|highest|strongest|leading|performing best/.test(q) && groupIdx >= 0 && business){
-      const ranked = qxBestByGroup(a, groupIdx, business.i);
-      if(ranked.length){
-        const top = ranked[0];
-        return {text:`${top[0]} is the strongest ${a.headers[groupIdx]} by ${business.h}, with ${qxFmt(top[1])} in the connected data.`,source:`${a.fileName} · grouped by ${a.headers[groupIdx]}`};
-      }
-    }
-
-    if(/below target|under target|attention|weak|worst|lowest/.test(q)){
-      const below = qxBelowTarget(a);
-      if(below.length){
-        const names = below.map(x=>`${x.label} (${qxPct(x.pct)})`).join(', ');
-        return {text:`I found ${below.length} row-level performance gaps below target. The largest gaps are: ${names}.`,source:`${a.fileName} · ${business?.h || 'actual'} vs ${target?.h || 'target'}`};
-      }
-      if(target && business) return {text:`No row-level values were found below target in the available actual-versus-target fields.`,source:`${a.fileName} · target comparison`};
-    }
-
-    if(/executive summary|summary|business pulse|overview/.test(q)){
-      let text = `The dataset contains ${a.data.length.toLocaleString()} rows and ${a.numeric.length} measurable fields.`;
-      if(business){
-        const total=business.vals.reduce((s,v)=>s+v,0);
-        text += ` Total ${business.h} is ${qxFmt(total)}.`;
-      }
-      if(a.achievement !== null) text += ` Overall target achievement is ${qxPct(a.achievement)}.`;
-      if(groupIdx >= 0 && business){
-        const ranked=qxBestByGroup(a,groupIdx,business.i);
-        if(ranked.length) text += ` ${ranked[0][0]} is the leading ${a.headers[groupIdx]} by ${business.h}.`;
-      }
-      const below=qxBelowTarget(a);
-      if(below.length) text += ` ${below.length} rows are below target and should be reviewed.`;
-      return {text,source:`${a.fileName} · executive local analysis`};
-    }
-
-    if(/target|achievement|attainment/.test(q) && business && target){
-      const totalB=business.vals.reduce((s,v)=>s+v,0);
-      const totalT=target.vals.reduce((s,v)=>s+v,0);
-      return {text:`${business.h} totals ${qxFmt(totalB)} against ${target.h} of ${qxFmt(totalT)} — ${totalT ? qxPct(totalB/totalT*100) : '—'} achievement.`,source:`${a.fileName} · target analysis`};
-    }
-
-    if(business){
-      return {text:`I can analyze ${business.h}, ${target ? target.h + ', ' : ''}${a.headers.slice(0,6).join(', ')} and the dataset structure. Try “What is the total business?”, “Which region is best?”, or “What is below target?”.`,source:`${a.fileName} · local AI analyst`};
-    }
-
-    return {text:`I found ${a.data.length.toLocaleString()} rows, but I could not confidently identify a primary business metric. Try asking about the available columns or connect a dataset with numeric KPI fields.`,source:`${a.fileName} · local analysis`};
-  }
-
-  // Upgrade the workspace UI with a connected-data indicator.
-  const wsChat = document.querySelector('.ws-chat');
-  if(wsChat && !document.getElementById('wsDataContext')){
-    const ctx = document.createElement('div');
-    ctx.id='wsDataContext';
-    ctx.className='ws-data-context';
-    wsChat.insertBefore(ctx, wsChat.querySelector('.ws-messages'));
-  }
-
-  // Rebind the existing workspace send/quick actions to the data-aware analyst.
-  const oldWsSend = wsSend;
-  const oldQuickQuestions = quickQuestions;
-  function askQuantixData(question){
-    const q=question.trim();
-    if(!q) return;
-    addWsMessage(q,'user');
-    wsInput.value='';
-    const thinking=document.createElement('div');
-    thinking.className='ws-msg ai';
-    thinking.innerHTML='<b>QUANTIX X</b>Analyzing your connected dataset…';
-    wsMessages.appendChild(thinking);
-    wsMessages.scrollTop=wsMessages.scrollHeight;
-    setTimeout(()=>{
-      const result=qxAnswer(q);
-      thinking.innerHTML='<b>QUANTIX X</b>' + result.text + `<span class="ws-source">${result.source}</span>`;
-      wsMessages.scrollTop=wsMessages.scrollHeight;
-    },650);
-  }
-
-  oldWsSend.replaceWith(oldWsSend.cloneNode(true));
-  const newWsSend=document.getElementById('wsSend');
-  newWsSend.addEventListener('click',()=>askQuantixData(wsInput.value));
-  wsInput.onkeydown=e=>{if(e.key==='Enter') askQuantixData(wsInput.value);};
-  oldQuickQuestions.forEach(btn=>{
-    btn.replaceWith(btn.cloneNode(true));
-  });
-  document.querySelectorAll('[data-question]').forEach(btn=>{
-    btn.addEventListener('click',()=>askQuantixData(btn.dataset.question));
-  });
-
 </script>
 
 
@@ -1722,208 +1315,182 @@
 (function(){
   'use strict';
 
-  function qxToast(msg){
-    var el=document.getElementById('qxExportStatus');
-    if(!el){
-      el=document.createElement('div');
-      el.id='qxExportStatus';
-      el.className='exec-status';
-      var dash=document.getElementById('execDashboard');
-      if(dash) dash.insertBefore(el,dash.firstChild);
-    }
-    el.textContent=msg;
-    el.classList.add('show');
-    clearTimeout(window.__qxToast);
-    window.__qxToast=setTimeout(function(){el.classList.remove('show')},3000);
+  var dataset = null;
+
+  function toast(msg){
+    var e=document.getElementById('qxExecStatus');
+    if(e){e.textContent=msg;}
+  }
+  function fmt(n){return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2});}
+  function pct(n){return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:1})+'%';}
+  function sum(col){return col ? col.vals.reduce(function(a,b){return a+b},0) : 0;}
+
+  function getDataset(){
+    return dataset || window.quantixDataset || null;
   }
 
-  function data(){
-    return window.quantixDataset || null;
+  async function captureDataset(){
+    try{
+      if(typeof dataFile==='undefined' || !dataFile.files || !dataFile.files[0]) return;
+      var rows=await readRows(dataFile.files[0]);
+      var a=analyzeRows(rows);
+      a.fileName=dataFile.files[0].name;
+      dataset=a;
+      window.quantixDataset=a;
+    }catch(e){}
   }
 
-  function fmt(n){
-    return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2});
-  }
+  function build(){
+    var a=getDataset();
+    if(!a) return null;
 
-  function pct(n){
-    return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:1})+'%';
-  }
-
-  function totalFor(col){
-    return col ? col.vals.reduce(function(s,v){return s+v},0) : 0;
-  }
-
-  function groups(a){
-    if(!a.business || a.region<0) return [];
-    var out={};
-    a.data.forEach(function(r){
-      var name=String(r[a.region]||'').trim();
-      var value=toNumber(r[a.business.i]);
-      if(name && value!==null) out[name]=(out[name]||0)+value;
-    });
-    return Object.keys(out).map(function(k){return [k,out[k]]})
-      .sort(function(x,y){return y[1]-x[1]}).slice(0,8);
-  }
-
-  window.qxGenerateExecutiveDashboard=function(){
-    var a=data();
-    var dash=document.getElementById('execDashboard');
-    var body=document.getElementById('execDashboardBody');
-    if(!dash || !body){
-      qxToast('Dashboard panel is missing from this page.');
-      return;
-    }
-    if(!a){
-      dash.classList.add('show');
-      body.innerHTML='<div class="exec-empty">Please upload and analyze an Excel or CSV file first.</div>';
-      qxToast('Connect your data first.');
-      dash.scrollIntoView({behavior:'smooth',block:'center'});
-      return;
-    }
-
-    var business=a.business;
-    var target=a.target;
-    var total=totalFor(business);
-    var targetTotal=totalFor(target);
+    var business=a.business, target=a.target;
+    var total=sum(business), targetTotal=sum(target);
     var achievement=targetTotal ? total/targetTotal*100 : null;
     var avg=business && business.vals.length ? total/business.vals.length : 0;
-    var ranked=groups(a);
+
+    var groupIdx=a.region>=0?a.region:-1, groups={};
+    if(groupIdx>=0 && business){
+      a.data.forEach(function(r){
+        var g=String(r[groupIdx]||'').trim(), v=toNumber(r[business.i]);
+        if(g && v!==null) groups[g]=(groups[g]||0)+v;
+      });
+    }
+    var ranked=Object.keys(groups).map(function(k){return [k,groups[k]]}).sort(function(x,y){return y[1]-x[1]}).slice(0,6);
     var recent=business ? business.vals.slice(-7) : [];
     var max=Math.max.apply(null,recent.length?recent:[1]);
 
     var bars=recent.map(function(v,i){
-      var h=Math.max(5,Math.round((v/(max||1))*100));
-      return '<div class="exec-bar-col"><div class="exec-bar" style="height:'+h+'%"></div><span>D'+(i+1)+'</span></div>';
+      return '<div class="qx-bar-col"><div class="qx-bar" style="height:'+Math.max(5,Math.round(v/max*100))+'%"></div><small>D'+(i+1)+'</small></div>';
     }).join('');
 
-    var table=ranked.length ? ranked.map(function(g,i){
+    var rows=ranked.length ? ranked.map(function(g,i){
       return '<tr><td>'+String(i+1)+'</td><td>'+String(g[0]).replace(/</g,'&lt;')+'</td><td>'+fmt(g[1])+'</td><td>'+pct(total?g[1]/total*100:0)+'</td></tr>';
-    }).join('') : '<tr><td colspan="4">No grouping field detected.</td></tr>';
+    }).join('') : '<tr><td colspan="4">No region/zone grouping detected.</td></tr>';
 
     var summary='Quantix X analyzed '+a.data.length.toLocaleString()+' rows across '+a.headers.length+' columns. ';
     if(business) summary+='Total '+business.h+' is '+fmt(total)+'. ';
     if(achievement!==null) summary+='Target achievement is '+pct(achievement)+'. ';
-    if(ranked.length) summary+=ranked[0][0]+' is the leading '+a.headers[a.region]+' by '+business.h+'. ';
+    if(ranked.length) summary+=ranked[0][0]+' is the leading '+a.headers[groupIdx]+'. ';
     summary+='Analysis confidence is '+pct(a.confidence)+'.';
 
-    body.innerHTML=
-      '<div class="exec-kpis">'+
-      '<div class="exec-kpi"><span>'+(business?business.h:'ROWS')+'</span><strong>'+(business?fmt(total):a.data.length.toLocaleString())+'</strong><em>connected data</em></div>'+
-      '<div class="exec-kpi"><span>TARGET</span><strong>'+(target?fmt(targetTotal):'—')+'</strong><em>'+(achievement!==null?pct(achievement)+' achievement':'not detected')+'</em></div>'+
-      '<div class="exec-kpi"><span>AVG / ROW</span><strong>'+(business?fmt(avg):'—')+'</strong><em>primary metric</em></div>'+
-      '<div class="exec-kpi"><span>AI CONFIDENCE</span><strong>'+pct(a.confidence)+'</strong><em>local analysis</em></div>'+
+    return '<div class="qx-exec-kpis">'+
+      '<div class="qx-exec-card"><span>'+(business?business.h:'ROWS')+'</span><strong>'+(business?fmt(total):a.data.length.toLocaleString())+'</strong><em>connected data</em></div>'+
+      '<div class="qx-exec-card"><span>TARGET</span><strong>'+(target?fmt(targetTotal):'—')+'</strong><em>'+(achievement!==null?pct(achievement)+' achievement':'not detected')+'</em></div>'+
+      '<div class="qx-exec-card"><span>AVG / ROW</span><strong>'+(business?fmt(avg):'—')+'</strong><em>primary metric</em></div>'+
+      '<div class="qx-exec-card"><span>CONFIDENCE</span><strong>'+pct(a.confidence)+'</strong><em>local analysis</em></div>'+
       '</div>'+
-      '<div class="exec-grid">'+
-      '<div class="exec-panel"><h5>7-Observation Trend</h5><div class="exec-bars">'+(bars||'<div class="exec-empty">No numeric trend available.</div>')+'</div></div>'+
-      '<div class="exec-panel"><h5>Top Performance</h5><table class="exec-table"><thead><tr><th>#</th><th>GROUP</th><th>VALUE</th><th>SHARE</th></tr></thead><tbody>'+table+'</tbody></table></div>'+
+      '<div class="qx-exec-grid">'+
+      '<div class="qx-exec-panel"><h5>7-Observation Trend</h5><div class="qx-bars">'+(bars||'No numeric trend available')+'</div></div>'+
+      '<div class="qx-exec-panel"><h5>Top Performance</h5><table class="qx-table"><thead><tr><th>#</th><th>GROUP</th><th>VALUE</th><th>SHARE</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
       '</div>'+
-      '<div class="exec-summary"><b>AI EXECUTIVE SUMMARY</b><br>'+summary+'</div>';
+      '<div class="qx-summary"><b>AI EXECUTIVE SUMMARY</b><br>'+summary+'</div>';
+  }
 
-    dash.classList.add('show');
-    var meta=document.getElementById('execMeta');
-    if(meta) meta.textContent='Generated from '+a.fileName+' · '+new Date().toLocaleString();
-    dash.scrollIntoView({behavior:'smooth',block:'center'});
-    qxToast('Executive dashboard generated.');
-  };
-
-  function requireData(){
-    if(!data()){
-      qxToast('Upload and analyze your Excel/CSV first.');
-      return false;
+  function show(){
+    var dash=document.getElementById('qxExecDashboard'), body=document.getElementById('qxExecBody');
+    if(!dash||!body) return;
+    var content=build();
+    if(!content){
+      body.innerHTML='<div class="qx-summary">Please upload and analyze an Excel or CSV file first.</div>';
+      dash.classList.add('show'); return;
     }
-    return true;
+    body.innerHTML=content;
+    var a=getDataset();
+    document.getElementById('qxExecMeta').textContent='Generated from '+a.fileName+' · '+new Date().toLocaleString();
+    dash.classList.add('show');
+    dash.scrollIntoView({behavior:'smooth',block:'center'});
+    toast('Executive dashboard generated from your data.');
   }
 
-  function download(name,blob){
-    var u=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=u;a.download=name;
-    document.body.appendChild(a);a.click();
-    setTimeout(function(){URL.revokeObjectURL(u);a.remove()},1000);
+  function downloadBlob(name,blob){
+    var url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);a.remove()},1200);
   }
 
-  function exportCSV(){
-    if(!requireData()) return;
-    var a=data(), rows=[['Quantix X Executive Dashboard'],['Source',a.fileName],['Rows',a.data.length],['Columns',a.headers.length],[],a.headers].concat(a.data);
-    var csv=rows.map(function(r){return r.map(function(v){var s=String(v??'');return '"'+s.replace(/"/g,'""')+'"'}).join(',')}).join('\r\n');
-    download('quantix-x-executive-dashboard.csv',new Blob([csv],{type:'text/csv;charset=utf-8'}));
-    qxToast('CSV/Excel-compatible report downloaded.');
+  function exportXlsx(){
+    var a=getDataset(); if(!a){show();return;}
+    if(!window.XLSX){toast('Excel engine loading — tap again in a moment.');return;}
+    var wb=XLSX.utils.book_new();
+    var total=sum(a.business), target=sum(a.target);
+    var summary=[['Quantix X — Executive Dashboard'],['Source',a.fileName],['Rows',a.data.length],['Columns',a.headers.length],['Confidence',a.confidence],[],['Metric','Value'],[a.business?a.business.h:'Primary Metric',total],[a.target?a.target.h:'Target',target],['Achievement %',a.achievement==null?'':a.achievement]];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),'Executive Summary');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([a.headers].concat(a.data)),'Source Data');
+    XLSX.writeFile(wb,'quantix-x-executive-dashboard.xlsx');
+    toast('Excel downloaded.');
   }
 
-  function exportPDF(){
-    if(!requireData()) return;
-    var dash=document.getElementById('execDashboard');
-    if(!dash) return;
-    var win=window.open('','_blank');
-    if(!win){qxToast('Allow pop-ups to create the PDF.');return;}
-    win.document.write('<!doctype html><html><head><title>Quantix X Executive Dashboard</title><style>'+
-      'body{background:#050a14;color:#dce8f7;font-family:Arial,sans-serif;padding:28px}'+
-      '.exec-actions,.exec-status{display:none!important}.exec-dashboard{display:block!important}'+
-      '.exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.exec-kpi,.exec-panel,.exec-summary{background:#0a1423;border:1px solid #1a2b40;border-radius:10px;padding:12px}.exec-kpi span,.exec-panel h5{color:#7dd3fc;font-size:10px}.exec-kpi strong{display:block;font-size:20px;margin:6px 0}.exec-kpi em{color:#5eead4;font-size:9px;font-style:normal}.exec-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px;margin-top:10px}.exec-bars{display:flex;align-items:flex-end;height:140px;gap:6px}.exec-bar-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.exec-bar{width:25px;background:#22d3ee}.exec-table{width:100%;border-collapse:collapse;font-size:10px}.exec-table td,.exec-table th{padding:6px;border-bottom:1px solid #1a2b40;text-align:left}.exec-summary{margin-top:10px;font-size:11px;line-height:1.5}.exec-summary b{color:#5eead4}'+
-      '</style></head><body><h1>Quantix X — Executive Performance Dashboard</h1>');
-    win.document.write(dash.outerHTML);
-    win.document.write('</body></html>');
-    win.document.close();
-    setTimeout(function(){win.focus();win.print()},600);
-    qxToast('PDF print view opened — choose Save as PDF.');
+  function exportPdf(){
+    var a=getDataset(); if(!a){show();return;}
+    var dash=document.getElementById('qxExecDashboard');
+    var w=window.open('','_blank');
+    if(!w){toast('Allow pop-ups to create the PDF.');return;}
+    w.document.write('<!doctype html><html><head><title>Quantix X Executive Dashboard</title><style>'+
+      'body{font-family:Arial;background:#050a14;color:#e6f1ff;padding:28px}.qx-exec{display:block!important}.qx-exec-actions,.qx-export-status{display:none}.qx-exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.qx-exec-card,.qx-exec-panel,.qx-summary{background:#0a1423;border:1px solid #1a2b40;border-radius:10px;padding:12px}.qx-exec-card span,.qx-exec-panel h5{font-size:10px;color:#7dd3fc}.qx-exec-card strong{display:block;font-size:20px;margin:6px 0}.qx-exec-card em{font-size:9px;color:#5eead4;font-style:normal}.qx-exec-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px;margin-top:10px}.qx-bars{height:140px;display:flex;align-items:flex-end;gap:7px}.qx-bar-col{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.qx-bar{width:25px;background:#22d3ee}.qx-table{width:100%;border-collapse:collapse;font-size:10px}.qx-table td,.qx-table th{padding:6px;border-bottom:1px solid #1a2b40;text-align:left}.qx-summary{margin-top:10px;font-size:11px;line-height:1.5}.qx-summary b{color:#5eead4}'+
+      '</style></head><body><h1>Quantix X — Executive Performance Dashboard</h1>'+dash.innerHTML+'</body></html>');
+    w.document.close(); setTimeout(function(){w.focus();w.print()},700);
+    toast('PDF print view opened — choose Save as PDF.');
   }
 
-  async function exportPPTX(){
-    if(!requireData()) return;
+  async function exportPptx(){
+    var a=getDataset(); if(!a){show();return;}
     try{
       if(!window.PptxGenJS){
         await new Promise(function(resolve,reject){
-          var s=document.createElement('script');
-          s.src='https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
-          s.onload=resolve;s.onerror=reject;document.head.appendChild(s);
+          var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);
         });
       }
-      var a=data(), p=new PptxGenJS();
-      p.layout='LAYOUT_WIDE';p.author='Quantix X';
+      var p=new PptxGenJS();p.layout='LAYOUT_WIDE';p.author='Quantix X';
       var s=p.addSlide();s.background={color:'050A14'};
       s.addText('QUANTIX X',{x:.6,y:.4,w:3,h:.3,fontSize:18,bold:true,color:'22D3EE'});
       s.addText('Executive Performance Dashboard',{x:.6,y:.9,w:8,h:.4,fontSize:24,bold:true,color:'FFFFFF'});
-      s.addText(a.fileName+' · '+new Date().toLocaleDateString(),{x:.6,y:1.35,w:7,h:.2,fontSize:9,color:'8EA0B8'});
-      var total=totalFor(a.business),target=totalFor(a.target);
-      [['PRIMARY',a.business?fmt(total):a.data.length],['TARGET',a.target?fmt(target):'—'],['ACHIEVEMENT',a.achievement!==null?pct(a.achievement):'—'],['CONFIDENCE',pct(a.confidence)]].forEach(function(c,i){
-        var x=.6+i*3.1;
-        s.addShape(p.ShapeType.roundRect,{x:x,y:1.8,w:2.7,h:1.0,fill:{color:'0A1423'},line:{color:'1A2B40'}});
-        s.addText(c[0],{x:x+.15,y:2.0,w:2.3,h:.15,fontSize:8,bold:true,color:'7DD3FC'});
+      s.addText(a.fileName+' · '+new Date().toLocaleDateString(),{x:.6,y:1.35,w:8,h:.2,fontSize:9,color:'8EA0B8'});
+      var total=sum(a.business),target=sum(a.target);
+      [['PRIMARY',a.business?fmt(total):a.data.length],['TARGET',a.target?fmt(target):'—'],['ACHIEVEMENT',a.achievement!=null?pct(a.achievement):'—'],['CONFIDENCE',pct(a.confidence)]].forEach(function(c,i){
+        var x=.6+i*3.1;s.addShape(p.ShapeType.roundRect,{x:x,y:1.8,w:2.7,h:1,fill:{color:'0A1423'},line:{color:'1A2B40'}});
+        s.addText(c[0],{x:x+.15,y:2,w:2.3,h:.15,fontSize:8,bold:true,color:'7DD3FC'});
         s.addText(String(c[1]),{x:x+.15,y:2.3,w:2.3,h:.25,fontSize:18,bold:true,color:'FFFFFF'});
       });
       s.addText('AI EXECUTIVE SUMMARY',{x:.6,y:3.2,w:4,h:.25,fontSize:13,bold:true,color:'5EEAD4'});
-      s.addText('Quantix X analyzed '+a.data.length.toLocaleString()+' rows. '+(a.business?'Total '+a.business.h+': '+fmt(total)+'. ':'')+(a.achievement!==null?'Target achievement: '+pct(a.achievement)+'.':''),{x:.6,y:3.6,w:11.7,h:1.0,fontSize:13,color:'B7C6D8'});
-      await p.writeFile({fileName:'quantix-x-executive-dashboard.pptx'});
-      qxToast('PPTX downloaded.');
-    }catch(e){qxToast('PPTX export failed. Try again.')}
+      s.addText('Quantix X analyzed '+a.data.length.toLocaleString()+' rows. '+(a.business?'Total '+a.business.h+': '+fmt(total)+'. ':'')+(a.achievement!=null?'Target achievement: '+pct(a.achievement)+'.':''),{x:.6,y:3.6,w:11.7,h:1,fontSize:13,color:'B7C6D8'});
+      await p.writeFile({fileName:'quantix-x-executive-dashboard.pptx'});toast('PPTX downloaded.');
+    }catch(e){toast('PPTX export failed: '+e.message);}
+  }
+
+  async function refreshDataset(){
+    await new Promise(function(r){setTimeout(r,1200)});
+    await captureDataset();
   }
 
   function wire(){
+    var analyze=document.getElementById('analyzeBtn');
+    if(analyze) analyze.addEventListener('click',refreshDataset);
+    var q=document.querySelector('.ws-quick');
+    if(q && !q.querySelector('#qxGenerateBtn')){
+      var b=document.createElement('button');b.type='button';b.id='qxGenerateBtn';b.textContent='Generate dashboard';
+      b.addEventListener('click',show);q.appendChild(b);
+    }
     document.addEventListener('click',function(e){
       var el=e.target.closest ? e.target.closest('[data-question]') : null;
       if(el && /generate.*dashboard|executive dashboard|build.*dashboard/i.test(el.getAttribute('data-question')||'')){
-        e.preventDefault();e.stopImmediatePropagation();
-        qxGenerateExecutiveDashboard();
+        e.preventDefault();e.stopImmediatePropagation();show();
       }
-      var id=e.target.id;
-      if(id==='viewExecBtn'){e.preventDefault();qxGenerateExecutiveDashboard();}
-      if(id==='pdfExecBtn'){e.preventDefault();exportPDF();}
-      if(id==='pptExecBtn'){e.preventDefault();exportPPTX();}
-      if(id==='xlsxExecBtn'){e.preventDefault();exportCSV();}
+    },true);
+    var send=document.getElementById('wsSend'), input=document.getElementById('wsInput');
+    if(send) send.addEventListener('click',function(){
+      if(input && /generate.*dashboard|executive dashboard|build.*dashboard/i.test(input.value)){show();input.value='';}
+    },true);
+    if(input) input.addEventListener('keydown',function(e){
+      if(e.key==='Enter' && /generate.*dashboard|executive dashboard|build.*dashboard/i.test(input.value)){e.preventDefault();e.stopImmediatePropagation();show();input.value='';}
     },true);
 
-    document.addEventListener('keydown',function(e){
-      if(e.key!=='Enter') return;
-      var input=document.getElementById('wsInput');
-      if(input && document.activeElement===input && /generate.*dashboard|executive dashboard|build.*dashboard/i.test(input.value)){
-        e.preventDefault();e.stopImmediatePropagation();
-        qxGenerateExecutiveDashboard();
-      }
-    },true);
+    document.getElementById('qxExecOpen').onclick=show;
+    document.getElementById('qxExecPdf').onclick=exportPdf;
+    document.getElementById('qxExecPptx').onclick=exportPptx;
+    document.getElementById('qxExecXlsx').onclick=exportXlsx;
   }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire);
-  else wire();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
 })();
 </script>
 
