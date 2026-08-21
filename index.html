@@ -537,6 +537,7 @@
     return `<!doctype html><html><head><meta charset="utf-8"><title>Quantix X Executive Dashboard</title>
     <style>body{margin:0;background:#050a14;color:#dce8f7;font-family:Arial,sans-serif;padding:30px}h1{margin:0 0 6px;font-size:26px}.meta{color:#8ea0b8;font-size:12px;margin-bottom:22px}.exec-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.exec-kpi,.exec-panel,.exec-summary{border:1px solid #1a2b40;background:#0a1423;border-radius:12px;padding:14px}.exec-kpi span,.exec-panel h5{font-size:10px;color:#7dd3fc;text-transform:uppercase}.exec-kpi strong{display:block;font-size:22px;margin:7px 0}.exec-kpi em{font-size:10px;color:#5eead4;font-style:normal}.exec-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}.exec-bars{display:flex;align-items:flex-end;gap:8px;height:160px}.exec-bar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px}.exec-bar{width:100%;max-width:35px;background:linear-gradient(#22d3ee,#3b82f6);border-radius:5px 5px 0 0}.exec-bar-col span{font-size:9px;color:#8ea0b8}.exec-table{width:100%;border-collapse:collapse;font-size:10px}.exec-table th,.exec-table td{padding:8px;border-bottom:1px solid #1a2b40;text-align:left}.exec-table th{color:#7dd3fc}.exec-summary{margin-top:12px;line-height:1.6;font-size:11px}.exec-summary b{color:#5eead4}</style></head><body>
     <h1>Quantix X — Executive Performance Dashboard</h1><div class="meta">${qxEsc(a.fileName)} · ${new Date().toLocaleString()}</div>${body}
+<script>
   /* PHASE 6.1 FIX — DOM-safe dashboard + exports */
   function qxToast(message){
     let el=document.getElementById('execToast');
@@ -708,6 +709,8 @@
   const qxBodyObserver=new MutationObserver(()=>qxWireDashboardButtons());
   if(document.body) qxBodyObserver.observe(document.body,{childList:true,subtree:true});
 
+
+</script>
 </body></html>`;
   }
 
